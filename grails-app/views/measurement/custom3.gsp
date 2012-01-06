@@ -110,6 +110,7 @@
                     </td>
                     <td>
               			<g:render template="/layouts/plot2" />
+        
 	      			</td></tr>
           			<tr>
           			         	<g:render template="/layouts/sgcalculations" />
@@ -117,12 +118,9 @@
           			</table> 	
                     
                 </div>
+      			<g:link controller="measurement">Measurement Home</g:link>
                 
             </g:form>
         </div>
-                <g:findAll in="${measurements}" expr="it.batch.id == '1'">
-				     <p>Temperature: ${it.liquorTemperature}</p>
-				</g:findAll>
-
     </body>
 </html>
