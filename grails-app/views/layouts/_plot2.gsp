@@ -44,9 +44,9 @@
 	    			var wortTempArray = [];
 	    	        var wortIndex=[];
 	    	        // go through Objects that are returned and convert them to a 2 dimensional vector [id, temp]
-	    			var d0 =Number(new Date(getDateFromFormat(temparray[0].dateAdded,'yyyy-MM-ddTHH:mm:ssZ')).getTime());
+	    			var d0 =Number(new Date(getDateFromFormat(temparray[0].dateCreated,'yyyy-MM-ddTHH:mm:ssZ')).getTime());
 	    	        for(var i=0;i<temparray.length;i++) {
-	    	   				d=(Number(new Date(getDateFromFormat(temparray[i].dateAdded,'yyyy-MM-ddTHH:mm:ssZ')).getTime())-d0)/(1000*60);
+	    	   				d=(Number(new Date(getDateFromFormat(temparray[i].dateCreated,'yyyy-MM-ddTHH:mm:ssZ')).getTime())-d0)/(1000*60);
 
 	    	   				if (temparray[i].liquorTemperature != null) {
 	    							if (temparray[i].stage != null & temparray[i].stage != stage[stage.length-1]) {
@@ -116,9 +116,8 @@
 		    		           if (item.series.label == "Liquor") {
 									var indexArray = liquorIndex;
 			    		           }
-		    		           
-		    		           
-	    		        	   window.location = '/BeerTool/measurement/edit/'+indexArray[item.dataIndex]
+		    		           		    		           
+	    		        	   window.location = '/BeerTool/measurement/editValue/'+indexArray[item.dataIndex]
 	    		               //$("#clickdata").text("You clicked point " + indexArray[item.dataIndex] + " in " + item.series.label + ".");
 	    		               //plot.highlight(item.series, item.datapoint);
 	    		           }

@@ -4,15 +4,161 @@ import grails.converters.JSON
 
 class MeasurementController {
 
-	static scaffold=true
-    def index = { redirect(action:list, params:params) }
+    static allowedMethods = [save: "POST", update: "POST", delete: "POST"]
 
-	def save = {
+    def index = {
+        redirect(action: "list", params: params)
+    }
+
+    def list = {
+        params.max = Math.min(params.max ? params.int('max') : 10, 100)
+        [measurementInstanceList: Measurement.list(params), measurementInstanceTotal: Measurement.count()]
+    }
+
+    def create = {
+        def measurementInstance = new Measurement()
+        measurementInstance.properties = params
+        return [measurementInstance: measurementInstance]
+    }
+
+ 	def customsave = {
 		def measurement = new Measurement(params)
 		if (!measurement.hasErrors()&&measurement.save(flush:true)) {
 			flash.message = "Measurement added"
 			redirect(action:custom3, params: ['batch.id':measurement.batch.id])}
 	}
+   def save = {
+        def measurementInstance = new Measurement(params)
+        if (measurementInstance.save(flush: true)) {
+            flash.message = "${message(code: 'default.created.message', args: [message(code: 'measurement.label', default: 'Measurement'), measurementInstance.id])}"
+            redirect(action: "show", id: measurementInstance.id)
+        }
+        else {
+            render(view: "create", model: [measurementInstance: measurementInstance])
+        }
+    }
+
+   
+    def show = {
+        def measurementInstance = Measurement.get(params.id)
+        if (!measurementInstance) {
+            flash.message = "${message(code: 'default.not.found.message', args: [message(code: 'measurement.label', default: 'Measurement'), params.id])}"
+            redirect(action: "list")
+        }
+        else {
+            [measurementInstance: measurementInstance]
+        }
+    }
+
+	def editValue = {
+        def measurementInstance = Measurement.get(params.id)
+		render(view: 'editValue', model: [measurementInstance: measurementInstance])
+	}
+    def edit = {
+        def measurementInstance = Measurement.get(params.id)
+        if (!measurementInstance) {
+            flash.message = "${message(code: 'default.not.found.message', args: [message(code: 'measurement.label', default: 'Measurement'), params.id])}"
+            redirect(action: "list")
+        }
+        else {
+            return [measurementInstance: measurementInstance]
+        }
+    }
+
+    def update = {
+        def measurementInstance = Measurement.get(params.id)
+        if (measurementInstance) {
+            if (params.version) {
+                def version = params.version.toLong()
+                if (measurementInstance.version > version) {
+                    
+                    measurementInstance.errors.rejectValue("version", "default.optimistic.locking.failure", [message(code: 'measurement.label', default: 'Measurement')] as Object[], "Another user has updated this Measurement while you were editing")
+                    render(view: "edit", model: [measurementInstance: measurementInstance])
+                    return
+                }
+            }
+            measurementInstance.properties = params
+            if (!measurementInstance.hasErrors() && measurementInstance.save(flush: true)) {
+                flash.message = "${message(code: 'default.updated.message', args: [message(code: 'measurement.label', default: 'Measurement'), measurementInstance.id])}"
+                redirect(action: "show", id: measurementInstance.id)
+            }
+            else {
+                render(view: "edit", model: [measurementInstance: measurementInstance])
+            }
+        }
+        else {
+            flash.message = "${message(code: 'default.not.found.message', args: [message(code: 'measurement.label', default: 'Measurement'), params.id])}"
+            redirect(action: "list")
+        }
+    }
+	
+	def customupdate = {
+		def measurementInstance = Measurement.get(params.id)
+		if (measurementInstance) {
+			if (params.version) {
+				def version = params.version.toLong()
+				if (measurementInstance.version > version) {
+					
+					measurementInstance.errors.rejectValue("version", "default.optimistic.locking.failure", [message(code: 'measurement.label', default: 'Measurement')] as Object[], "Another user has updated this Measurement while you were editing")
+					render(view: "edit", model: [measurementInstance: measurementInstance])
+					return
+				}
+			}
+			measurementInstance.properties = params
+			if (!measurementInstance.hasErrors() && measurementInstance.save(flush: true)) {
+				flash.message = "${message(code: 'default.updated.message', args: [message(code: 'measurement.label', default: 'Measurement'), measurementInstance.id])}"
+				redirect(action:custom3, params: ['batch.id':measurementInstance.batch.id])
+			
+			}
+			else {
+				render(view: "edit", model: [measurementInstance: measurementInstance])
+			}
+		}
+		else {
+			flash.message = "${message(code: 'default.not.found.message', args: [message(code: 'measurement.label', default: 'Measurement'), params.id])}"
+			redirect(action: "list")
+		}
+	}
+
+
+	def customdelete = {
+		def measurementInstance = Measurement.get(params.id)
+		if (measurementInstance) {
+			try {
+				measurementInstance.delete(flush: true)
+				flash.message = "${message(code: 'default.deleted.message', args: [message(code: 'measurement.label', default: 'Measurement'), params.id])}"
+				redirect(action:custom3, params: ['batch.id':measurementInstance.batch.id])
+			}
+			catch (org.springframework.dao.DataIntegrityViolationException e) {
+				flash.message = "${message(code: 'default.not.deleted.message', args: [message(code: 'measurement.label', default: 'Measurement'), params.id])}"
+				redirect(action:custom3, params: ['batch.id':measurementInstance.batch.id])
+			}
+		}
+		else {
+			flash.message = "${message(code: 'default.not.found.message', args: [message(code: 'measurement.label', default: 'Measurement'), params.id])}"
+				redirect(action:custom3, params: ['batch.id':measurementInstance.batch.id])
+		}
+	}
+	
+
+    def delete = {
+        def measurementInstance = Measurement.get(params.id)
+        if (measurementInstance) {
+            try {
+                measurementInstance.delete(flush: true)
+                flash.message = "${message(code: 'default.deleted.message', args: [message(code: 'measurement.label', default: 'Measurement'), params.id])}"
+                redirect(action: "list")
+            }
+            catch (org.springframework.dao.DataIntegrityViolationException e) {
+                flash.message = "${message(code: 'default.not.deleted.message', args: [message(code: 'measurement.label', default: 'Measurement'), params.id])}"
+                redirect(action: "show", id: params.id)
+            }
+        }
+        else {
+            flash.message = "${message(code: 'default.not.found.message', args: [message(code: 'measurement.label', default: 'Measurement'), params.id])}"
+            redirect(action: "list")
+        }
+    }
 	
 	
 	def custom2 = {
@@ -70,37 +216,4 @@ class MeasurementController {
 	}
 		
 
-		def showAll = {
-		render Measurement.findAll() as JSON
-	}
-
-	def test = {
-		render(view:'test')
-	}
-	
-/*	def getSample = {
-		def batch = Batch.get(params.id)
-		render batch?.batch as JSON
-	}*/
-
-	def plotSample = {
-		def batch = Batch.get(params.batch.id)
-		def datavals = batch ? Measurement.findAllByBatch(batch) : []
-		def datavals2 = datavals as JSON
-		def batchid = params.batch.id
-		render(view:'/batch/temperaturePlot', model: [datavals: datavals2, batchid: batchid])
-	}
-		
-	def custom = {
-		render(view:'custom')
-	}
-
-	def afterInterceptor  = {model, modelAndView ->
-		def batch = Batch.get(params.id)
-		def datavals = batch ? Measurement.findAllByBatch(batch) : []
-		def datavals2 = datavals as JSON
-		def batchid = params.id
-		render(view:'batch/temperaturePlot', model: [datavals: datavals2, batchid: batchid])
-	}
-		
 }
