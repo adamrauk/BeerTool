@@ -118,9 +118,10 @@
           			</table> 	
                     
                 </div>
-      			<g:link controller="measurement">Measurement Home</g:link>
                 
             </g:form>
         </div>
+      			<g:link controller="measurement">Measurement Home</g:link>
     </body>
+    test
 </html>
