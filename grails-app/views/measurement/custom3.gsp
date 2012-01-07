@@ -112,7 +112,13 @@
               			<g:render template="/layouts/plot2" />
         
 	      			</td></tr>
-          			<tr>
+	       			<tr><td>
+	       			
+		      			<g:link controller="measurement" action="edit" params="[id: 1]">Measurement Home</g:link>
+					</td>
+	      			</tr>
+	      			
+	              			<tr>
           			         	<g:render template="/layouts/sgcalculations" />
  				</tr>
           			</table> 	
@@ -121,7 +127,5 @@
                 
             </g:form>
         </div>
-      			<g:link controller="measurement">Measurement Home</g:link>
     </body>
-    test
 </html>

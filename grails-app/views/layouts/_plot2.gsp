@@ -14,7 +14,7 @@
     		<div id="placeholder"  style="width:400px;height:200px;"></div>
 		<div id="placeholder2"  style="width:50px;height:50px;"></div>
 	   <div id="overview" style="margin-left:50px;margin-top:20px;width:400px;height:50px"></div>
-	   
+	   <span id="clickdata"></span>
 
 		<script id="source2" language="javascript" type="text/javascript">
 		$(function () {
@@ -22,22 +22,11 @@
 		    var options = {
 			    		selection: {mode: "x"},
 			    		legend: {container: placeholder2},
-			    		grid: {hoverable: true, borderWidth: 0}
+			    		grid: {hoverable: true, clickable: true, borderWidth: 0}
 		    		};
-
-	        var stage = [];
-	        var dataVal = [];
-			var dataVal2 = [];
-		    var temparray = [];
 
             var placeholder = $("#placeholder");
 	        
-	        $.plot($("#placeholder"), 
- 	 	    	   [{label: "Liquor", color: "#0066CC", data: dataVal, lines: {show: true}, points: {show: true}}, 
- 	 		    	{label: "Wort", color: "#B05F3C", data: dataVal2, lines: {show: true}, points: {show: false}}],
- 	 		    	options
- 	 		    	);
-
 
 	//        $("input.fetchSeries").click(function () {
 //	            var button = $(this);
@@ -50,36 +39,41 @@
 	            function onDataReceived(temparray2) {
 		            var temparray = temparray2[1];
 	    	        var stage = [];
-	    	        var dataVal = [];
-	    			var dataVal2 = [];
+	    	        var liquorTempArray = [];
+	    	        var liquorIndex=[];
+	    			var wortTempArray = [];
+	    	        var wortIndex=[];
 	    	        // go through Objects that are returned and convert them to a 2 dimensional vector [id, temp]
-	    			var d0 =Number(new Date(getDateFromFormat(temparray[0].lastUpdated,'yyyy-MM-ddTHH:mm:ssZ')).getTime());
+	    			var d0 =Number(new Date(getDateFromFormat(temparray[0].dateAdded,'yyyy-MM-ddTHH:mm:ssZ')).getTime());
 	    	        for(var i=0;i<temparray.length;i++) {
-	    	   				d=(Number(new Date(getDateFromFormat(temparray[i].lastUpdated,'yyyy-MM-ddTHH:mm:ssZ')).getTime())-d0)/(1000*60);
+	    	   				d=(Number(new Date(getDateFromFormat(temparray[i].dateAdded,'yyyy-MM-ddTHH:mm:ssZ')).getTime())-d0)/(1000*60);
 
 	    	   				if (temparray[i].liquorTemperature != null) {
 	    							if (temparray[i].stage != null & temparray[i].stage != stage[stage.length-1]) {
 	    				   				stage.push(null);
-	    				   				dataVal.push([null,null])
+	    				   				liquorTempArray.push([null,null])
+	    				   				liquorIndex.push(null)
 	    								}
+    								
 	    						stage.push(temparray[i].stage)
-	    		   				dataVal.push([
+	    		   				liquorTempArray.push([
 	    	  			   			d, 
 	    	  			   			temparray[i].liquorTemperature]);
+	    						liquorIndex.push(temparray[i].id)
 	    	   				}
 	    	   				if (temparray[i].wortTemperature != null) {
-	    		   				dataVal2.push([
+	    		   				wortTempArray.push([
 	    		  			   			d, 
 	    		  			   			temparray[i].wortTemperature]);
+		  			   			wortIndex.push(temparray[i].id)
 	    			   		}
-	    	  			   		
 	    	   		}
 	    	   		
 		                
 	                // and plot all we got
-	    	        $.plot($("#placeholder"), 
-	    	 	    	   [{label: "Liquor", color: "#0066CC", data: dataVal, lines: {show: true}, points: {show: true}}, 
-	    	 		    	{label: "Wort", color: "#B05F3C", data: dataVal2, lines: {show: true}, points: {show: false}}],
+	    	       var plot = $.plot($("#placeholder"), 
+	    	 	    	   [{label: "Liquor", color: "#0066CC", data: liquorTempArray, lines: {show: true}, points: {show: true}}, 
+	    	 		    	{label: "Wort", color: "#B05F3C", data: wortTempArray, lines: {show: true}, points: {show: false}}],
 	    	 		    	options
 	    	 		    	);
 	    		       function showTooltip(x, y, contents) {
@@ -114,6 +108,21 @@
 	    		               }
 
 	    		       });
+	    		       $("#placeholder").bind("plotclick", function (event, pos, item) {
+	    		           if (item) {
+		    		           if (item.series.label == "Wort") {
+									var indexArray = wortIndex;
+			    		           }
+		    		           if (item.series.label == "Liquor") {
+									var indexArray = liquorIndex;
+			    		           }
+		    		           
+		    		           
+	    		        	   window.location = '/BeerTool/measurement/edit/'+indexArray[item.dataIndex]
+	    		               //$("#clickdata").text("You clicked point " + indexArray[item.dataIndex] + " in " + item.series.label + ".");
+	    		               //plot.highlight(item.series, item.datapoint);
+	    		           }
+	    		       });
 	    		       	        
 
 	    		       
@@ -130,7 +139,7 @@
 	        
 
 	        // and plot all we got
-	           // make sure to include dataVal as an array because flot expects you to have 1 or more series to plot
+	           // make sure to include liquorTempArray as an array because flot expects you to have 1 or more series to plot
 
 	    });
 	           
