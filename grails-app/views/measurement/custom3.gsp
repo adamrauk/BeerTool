@@ -118,9 +118,9 @@
 					</td>
 	      			</tr>
 	      			
-	              			<tr>
+	              			<tr><td>
           			         	<g:render template="/layouts/sgcalculations" />
- 				</tr>
+          			         </td></tr>
           			</table> 	
                     
                 </div>

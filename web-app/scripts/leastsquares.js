@@ -1,4 +1,4 @@
-function findLineByLeastSquares(values_x, values_y, desired_y) {
+function fitLine(values_x, values_y, desired_y) {
     var sum_x = 0;
     var sum_y = 0;
     var sum_xy = 0;
