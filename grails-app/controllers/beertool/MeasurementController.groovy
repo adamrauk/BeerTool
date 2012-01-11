@@ -205,14 +205,23 @@ class MeasurementController {
 		render(recipevals2)
 	}
 
+	def getHops = {
+		def batch = Batch.get(params.batch.id)
+		def hopvals = batch ? RecipeHops.getAll() : []
+		def hopvals2 = hopvals as JSON
+		render(hopvals2)
+	}
 
-	def getStuff = {
+	
+	def getBatch = {
 		def batch = Batch.get(params.batch.id)
 		def recipevals = batch ? Recipe.getAll() : []
 		def recipevals2 = recipevals as JSON
 		def datavals = batch ? Measurement.findAllByBatch(batch) : []
 		def datavals2 = datavals as JSON
-		render([recipevals2, datavals2])
+		def hopvals = batch ? RecipeHops.getAll() : []
+		def hopvals2 = hopvals as JSON
+		render([recipevals2, datavals2,hopvals2])
 	}
 		
 

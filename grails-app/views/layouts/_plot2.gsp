@@ -7,30 +7,22 @@
    	 	<script language="javascript" type="text/javascript" src="/BeerTool/scripts/leastsquares.js"></script>
 
 			<script type="text/javascript">
-			var t;
-			var timer_is_on=0;
-			var c=3;
-			function timedCount(c)
+			var t = {};
+			var timerref;
+			var timerindx;
+			function timedCount(c,timerref,timerindx)
 			{
 					var pad = "00";
 					var seconds=""+c%60;
 					var minutes=Math.floor(c/60);
-					document.getElementById('timer').innerHTML=minutes+":"+pad.substring(0,pad.length-seconds.length)+seconds;
+					document.getElementById(timerref).innerHTML=minutes+":"+pad.substring(0,pad.length-seconds.length)+seconds;
 					c=c-1;
 					if(c>=0) {
-						t=setTimeout("timedCount("+c+")",1000);
+						t[timerindx]=setTimeout("timedCount("+c+",\'"+timerref+"\',"+timerindx+")",1000);
 					}
 			}
 			
-			function doTimer()
-			{
-			if (!timer_is_on)
-			  {
-			  timer_is_on=1;
-			  timedCount();
-			  }
-			}
-
+			
 		   function getTargetTime() {
 			    var targetTemp = document.getElementById('targettemp').value;
 				var now = new Date();
@@ -38,11 +30,22 @@
 			    var predictedtime = fitLine(liquorCurrent['time'],liquorCurrent['temp'],targetTemp);
 			    if ((d0+predictedtime) > (now.getTime()+timeoffset)) {
 					var c=Math.round(predictedtime/1000);
-					timedCount(Math.round(((d0+predictedtime)-(now.getTime()+timeoffset))/1000));
+					timedCount(Math.round(((d0+predictedtime)-(now.getTime()+timeoffset))/1000),"liquortimer",0);
 				}
 		   }
 			
-			</script> 
+		   function getTargetTimeWort() {
+			    var targetTemp = document.getElementById('targettempwort').value;
+				var now = new Date();
+			    var timeoffset =  now.getTimezoneOffset()*60*1000;
+			    var predictedtime = fitLine(wortCurrent['time'],wortCurrent['temp'],targetTemp);
+			    if ((d0+predictedtime) > (now.getTime()+timeoffset)) {
+					var c=Math.round(predictedtime/1000);
+					timedCount(Math.round(((d0+predictedtime)-(now.getTime()+timeoffset))/1000),"worttimer",1);
+				}
+		   }
+
+		   </script> 
 		 <p>
 <!--		      <input class="fetchSeries" type="button" value="Show Data"> -->
 <!--  		      <a href="getData?batch.id=1">data</a> --->
@@ -51,10 +54,20 @@
     		<div id="placeholder"  style="width:400px;height:200px;"></div>
 		<div id="placeholder2"  style="width:50px;height:50px;"></div>
 	   <div id="overview" style="margin-left:50px;margin-top:20px;width:400px;height:50px"></div>
-	   <span id="timer"></span> 
+	   Liquor Timer: <span id="liquortimer"></span> 
 	   	<br>
 	   	Temperature: <g:textField name="targettemp" value="160" />
-	   	<input class="getTargetTime" type="button" value="Refresh Timer" onclick="getTargetTime()">
+	   	<input class="timerbutton" type="button" value="Refresh Timer"">
+		<br>
+	   Wort timer: <span id="worttimer"></span> 
+	   	<br>
+	   	Temperature: <g:textField name="targettempwort" value="160" />
+		<br>
+	   Hop timer 1: <span id="hoptimer1"></span> 
+		<br>
+	   Hop timer 2: <span id="hoptimer2"></span> 
+		<br>
+	   Hop timer 3: <span id="hoptimer3"></span> 
 	   <span id="clickdata"></span>
 	   <span id="txt"></span>
 		<script id="source2" language="javascript" type="text/javascript">
@@ -71,30 +84,21 @@
             var placeholder = $("#placeholder");
 	        
 
-	//        $("input.fetchSeries").click(function () {
-//	            var button = $(this);
-	            
-	            // find the URL in the link right next to us 
-	//            var dataurl = button.siblings('a').attr('href');
-				var dataurl = 'getStuff?batch.id=${batchid}'
-	            // then fetch the data with jQuery
-
-			     function getLocalTime(gmt)  {
-			       var min = gmt.getTime() / 1000 / 60; // convert gmt date to minutes
-			       var localNow = new Date().getTimezoneOffset(); // get the timezone 
-			                                                      // offset in minutes            
-			       var localTime = min - localNow; // get the local time
-			       return new Date(localTime * 1000 * 60); // convert it into a date
-			    }	            
+				var dataurl = 'getBatch?batch.id=${batchid}'
 	            
 	            function onDataReceived(temparray2) {
 		            var temparray = temparray2[1];
+		            var hopsinput = temparray2[2];
 	    	        var stage = [];
+	    	        var stagewort = [];
 	    	        var liquorTempArray = [];
 	    	        var liquorIndex=[];
 	    	        var liquorCurrent={time: [], temp: []};
+	    	        var wortCurrent={time: [], temp: []};
 	    			var wortTempArray = [];
 	    	        var wortIndex=[];
+	    	        var startboil = null;
+	    	        var hopsArray = [];
 	    	        // go through Objects that are returned and convert them to a 2 dimensional vector [id, temp]
 	    			var d0 =Number(new Date(getDateFromFormat(temparray[0].dateCreated,'yyyy-MM-ddTHH:mm:ssZ')).getTime());
 	    	        for(var i=0;i<temparray.length;i++) {
@@ -120,13 +124,46 @@
 	    						liquorCurrent['temp'].push(temparray[i].liquorTemperature)
 	    	   				}
 	    	   				if (temparray[i].wortTemperature != null) {
-	    		   				wortTempArray.push([
+    							if (temparray[i].stage != null & temparray[i].stage != stagewort[stagewort.length-1]) {
+    				   				stagewort.push(null);
+    				   				wortCurrent={time: [], temp: []}
+    				   				dCurrentWort=[]
+    				    			var d0 =Number(new Date(getDateFromFormat(temparray[i].dateCreated,'yyyy-MM-ddTHH:mm:ssZ')).getTime());
+    							}
+
+    							stagewort.push(temparray[i].stage)
+	    	   					wortTempArray.push([
 	    		  			   			d, 
 	    		  			   			temparray[i].wortTemperature]);
 		  			   			wortIndex.push(temparray[i].id)
+	    						wortCurrent['time'].push(dMilliseconds-d0)
+	    						wortCurrent['temp'].push(temparray[i].wortTemperature)
 	    			   		}
-	    	   		}
+							if (temparray[i].stage == "Boil" & startboil == null) {
+								var startboil = new Date(getDateFromFormat(temparray[i].dateCreated,'yyyy-MM-ddTHH:mm:ssZ'))}
+	    	   				if (temparray[i].wortTemperature == null & temparray[i].stage == "Boil") {
+    							if (temparray[i].stage != null & temparray[i].stage != stagewort[stagewort.length-1]) {
+    				   				wortCurrent={time: [], temp: []}
+    				   				dCurrentWort=[]
+    				    			var d0 =Number(new Date(getDateFromFormat(temparray[i].dateCreated,'yyyy-MM-ddTHH:mm:ssZ')).getTime());
+    							}
+    							stagewort.push(temparray[i].stage)
+	    	   					wortTempArray.push([
+	    		  			   			d, 
+	    		  			   			212]);
+		  			   			wortIndex.push(temparray[i].id)
+	    						wortCurrent['time'].push(dMilliseconds-d0)
+	    						wortCurrent['temp'].push(212)
+							}
+	    	        }
 
+	    	        if (startboil != null) {
+		    	        for(var i=0;i<hopsinput.length;i++) {
+			   				hopsArray.push([new Date(Number(startboil.getTime())+Number((60-hopsinput[i].boilTime)*60*1000)), 
+		  	    	  			212]);
+		    	        }
+	    	        }
+					
 					var now = new Date();
 					var timeoffset =  now.getTimezoneOffset()*60*1000;
 //					var predictedtime = new Date(Math.round(Number(fitLine(liquorCurrent['time'],liquorCurrent['temp'],160)))+timeoffset);
@@ -136,22 +173,39 @@
 //					document.getElementById('txt').innerHTML=predictedtime;
 					if ((d0+predictedtime) > (now.getTime()+timeoffset)) {
 //						document.getElementById('txt').innerHTML=new Date(Math.round(d0+predictedtime)-timeoffset);
-						clearTimeout(t);
+						clearTimeout(t[0]);
 						var c=Math.round(predictedtime/1000);
-						timedCount(Math.round(((d0+predictedtime)-(now.getTime()+timeoffset))/1000));
-						
+						timedCount(Math.round(((d0+predictedtime)-(now.getTime()+timeoffset))/1000),
+								"liquortimer",0);
 					}
-//					document.getElementById('txt').innerHTML=Math.round(d0+predictedtime);
-//						document.getElementById('txt').innerHTML=now.getTime()+timeoffset;
-									
- //	    	        document.getElementById('txt').innerHTML=fitLine(liquorCurrent[0],liquorCurrent[1],160);
-//	    	        document.getElementById('txt').innerHTML=new Date(liquorCurrent['time'][1])
-//	    	        document.getElementById('txt').innerHTML=liquorCurrent['time'][1]
+					else {clearTimeout(t[0]); 
+						document.getElementById('liquortimer').innerHTML=""}
 
-	                // and plot all we got
+					var targetTemp = document.getElementById('targettempwort').value;
+					var predictedtime = fitLine(wortCurrent['time'],wortCurrent['temp'],targetTemp);
+					if ((d0+predictedtime) > (now.getTime()+timeoffset)) {
+						clearTimeout(t[1]);
+						var c=Math.round(predictedtime/1000);
+						timedCount(Math.round(((d0+predictedtime)-(now.getTime()+timeoffset))/1000),"worttimer",1);
+					}
+					else {clearTimeout(t[1]); 
+						document.getElementById('worttimer').innerHTML=""}
+
+	    	        if (startboil != null) {
+		    	        for(var i=0;i<hopsinput.length;i++) {
+		    	        	if (Number(startboil.getTime())+Number((60-hopsinput[i].boilTime)*60*1000) > (now.getTime()+timeoffset)) {
+		    	        		timedCount(Math.round(((Number(startboil.getTime())+Number((60-hopsinput[i].boilTime)*60*1000))-(now.getTime()+timeoffset))/1000),"hoptimer"+(i+1),i+2);
+			    	        	}
+
+		    	        }
+	    	        }
+					
+					
+
 	    	       var plot = $.plot($("#placeholder"), 
 	    	 	    	   [{label: "Liquor", color: "#0066CC", data: liquorTempArray, lines: {show: true}, points: {show: true}}, 
-	    	 		    	{label: "Wort", color: "#B05F3C", data: wortTempArray, lines: {show: true}, points: {show: false}}],
+	    	 		    	{label: "Wort", color: "#B05F3C", data: wortTempArray, lines: {show: true}, points: {show: false}},
+	    	 		    	{label: "Hops", color:"#009900", data: hopsArray, lines: {show: false}, points: {show: true}}],
 	    	 		    	options
 	    	 		    	);
 	    		       function showTooltip(x, y, contents) {
@@ -196,8 +250,6 @@
 			    		           }
 		    		           		    		           
 	    		        	   window.location = '/BeerTool/measurement/editValue/'+indexArray[item.dataIndex]
-	    		               //$("#clickdata").text("You clicked point " + indexArray[item.dataIndex] + " in " + item.series.label + ".");
-	    		               //plot.highlight(item.series, item.datapoint);
 	    		           }
 	    		       });
 
@@ -211,9 +263,8 @@
 	                dataType: 'json',
 	                success: onDataReceived
 	            });
-	//        });
 
-			$("input.getTargetTime").click(function() {
+			$("input.timerbutton").click(function() {
 	            $.ajax({
 	                url: dataurl,
 	                method: 'GET',

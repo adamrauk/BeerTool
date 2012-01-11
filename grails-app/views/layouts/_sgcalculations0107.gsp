@@ -26,7 +26,7 @@
 			var recipearray = inputdata[0];
 			var temparray = inputdata[1];
 
-			var dataurl2 = 'getStuff?batch.id=${batchid}';
+			var dataurl2 = 'getBatch?batch.id=${batchid}';
 			
 	        var sgVal = [];
 	        var tempVal = [];
