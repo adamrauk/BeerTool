@@ -113,7 +113,6 @@
         
 	      			</td></tr>
 	       			<tr><td>
-	       			
 		      			<g:link controller="measurement" action="edit" params="[id: 1]">Measurement Home</g:link>
 					</td>
 	      			</tr>

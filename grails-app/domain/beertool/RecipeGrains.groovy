@@ -3,6 +3,8 @@ package beertool
 class RecipeGrains {
 
     static constraints = {
+		
+		targetTime(nullable:true)
     }
 	
 	static hasMany = [grains:Grains]
@@ -11,8 +13,7 @@ class RecipeGrains {
 	Recipe recipe
 	Grains grains
 	BigDecimal amount
-	BigDecimal targetTemperature
 	BigDecimal targetTime
 	
-	String toString() {grains.name + "(" + amount+ " lb, temperature=" + targetTemperature + ", mash time=" + targetTime + " min)"}
+	String toString() {grains.name + "(" + amount+ " lb, mash time=" + targetTime + " min)"}
 }

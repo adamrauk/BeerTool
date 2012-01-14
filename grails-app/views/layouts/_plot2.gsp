@@ -10,6 +10,7 @@
 			var t = {};
 			var timerref;
 			var timerindx;
+			var hoptimer = {};
 			function timedCount(c,timerref,timerindx)
 			{
 					var pad = "00";
@@ -56,36 +57,41 @@
 	   <div id="overview" style="margin-left:50px;margin-top:20px;width:400px;height:50px"></div>
 	   Liquor Timer: <span id="liquortimer"></span> 
 	   	<br>
-	   	Temperature: <g:textField name="targettemp" value="160" />
+	   	Temperature: <g:textField name="targettemp" value="${recipeInstance.mashTemperature}" />
 	   	<input class="timerbutton" type="button" value="Refresh Timer"">
 		<br>
 	   Wort timer: <span id="worttimer"></span> 
 	   	<br>
-	   	Temperature: <g:textField name="targettempwort" value="160" />
-		<br>
-	   Hop timer 1: <span id="hoptimer1"></span> 
-		<br>
-	   Hop timer 2: <span id="hoptimer2"></span> 
-		<br>
-	   Hop timer 3: <span id="hoptimer3"></span> 
+	   	Temperature: <g:textField name="targettempwort" value="${recipeInstance.mashTemperature}" />
 	   <span id="clickdata"></span>
 	   <span id="txt"></span>
+       	<g:set var="counter" value="${1}" />
+		<table>
+        <g:each in="${recipeInstance.recipeHops}" var="r">
+        	<g:set var="boiltimes[${counter-1}]" value="${r.boilTime}" />
+			<tr><td>
+            <span id="hoptimer[${r.id}]" title="${r.boilTime}"></span></td><td><g:link controller="recipeHops" action="show" id="${r.id}">${r?.encodeAsHTML()}</g:link>
+        	  </td></tr>
+        	  <g:set var="counter" value="${counter+1}" />
+        </g:each>
+		
+		</table>
+
 		<script id="source2" language="javascript" type="text/javascript">
 		
 		$(function () {
 
 		    var options = {
 			    		selection: {mode: "x"},
-			    		legend: {container: placeholder2},
+			    		legend: {container: placeholder2, noColumns: 3},
 			    		grid: {hoverable: true, clickable: true, borderWidth: 0},
 			    		xaxis: {mode: "time"}
 		    		};
 
             var placeholder = $("#placeholder");
-	        
-
+	    
 				var dataurl = 'getBatch?batch.id=${batchid}'
-	            
+					            
 	            function onDataReceived(temparray2) {
 		            var temparray = temparray2[1];
 		            var hopsinput = temparray2[2];
@@ -194,12 +200,13 @@
 	    	        if (startboil != null) {
 		    	        for(var i=0;i<hopsinput.length;i++) {
 		    	        	if (Number(startboil.getTime())+Number((60-hopsinput[i].boilTime)*60*1000) > (now.getTime()+timeoffset)) {
-		    	        		timedCount(Math.round(((Number(startboil.getTime())+Number((60-hopsinput[i].boilTime)*60*1000))-(now.getTime()+timeoffset))/1000),"hoptimer"+(i+1),i+2);
+		    	        		timedCount(Math.round(((Number(startboil.getTime())+Number((60-hopsinput[i].boilTime)*60*1000))-(now.getTime()+timeoffset))/1000),"hoptimer["+hopsinput[i].id+"]",i+2);
 			    	        	}
 
 		    	        }
+
 	    	        }
-					
+					document.getElementById('txt').innerHTML=hopsinput[0].id;
 					
 
 	    	       var plot = $.plot($("#placeholder"), 
