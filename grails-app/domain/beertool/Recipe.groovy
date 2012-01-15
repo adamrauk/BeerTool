@@ -4,7 +4,7 @@ package beertool
 class Recipe {
 
     static constraints = {
-		name()
+		name(nullable: true)
 		style()
 		brewingMethod(inList:["All Grain","Partial Extract","Extract"])
 		targetSG(nullable:true)
@@ -12,8 +12,8 @@ class Recipe {
 		mashTemperature(nullable:true)
     }
 
-	static hasMany = [batch:Batch, recipeGrains:RecipeGrains,
-		recipeHops:RecipeHops, recipeSugar:RecipeSugar, recipeYeast:RecipeYeast]
+	static hasMany = [recipeGrains:RecipeGrains,
+		recipeHops:RecipeHops, recipeSugar:RecipeSugar, recipeYeast:RecipeYeast, batch:Batch]
 	
 	String name
 	String style
