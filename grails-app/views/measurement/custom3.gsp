@@ -7,6 +7,22 @@
         <meta name="layout" content="main" />
         <g:set var="entityName" value="${message(code: 'measurement.label', default: 'Measurement')}" />
         <title><g:message code="default.create.label" args="[entityName]" /></title>
+		<script language="javascript">
+		    function elementHideShow(elementToHideOrShow) 
+		    {
+		        var el = document.getElementById(elementToHideOrShow);
+		        if (el.style.display == "block") {
+		
+		            el.style.display = "none";
+		        }
+		        else 
+		        {
+		            el.style.display = "block";
+		        }
+		    }         
+		</script>
+        
+        
     </head>
     <body>
         <div class="nav">
@@ -32,7 +48,7 @@
 					<tr><td>
                     <table>
                         <tbody>
-                        
+							<tr></tr>                        
                             <tr class="prop">
                                 <td valign="top" class="name">
                                     <label for="stage"><g:message code="measurement.stage.label" default="Stage" /></label>
@@ -108,18 +124,14 @@
                         </tbody>
                     </table>
                     </td>
-                    <td>
+                    <td rowspan="3">
               			<g:render template="/layouts/plot2" />
         
 	      			</td></tr>
-	       			<tr><td>
-		      			<g:link controller="measurement" action="edit" params="[id: 1]">Measurement Home</g:link>
-					</td>
-	      			</tr>
-	      			
-	              			<tr><td>
-          			         	<g:render template="/layouts/sgcalculations" />
-          			         </td></tr>
+						<tr><td><a href="javascript:elementHideShow('sgcalculations');">show/hide</a></td></tr>	
+             			<tr><td>
+        			         	<g:render template="/layouts/sgcalculations" />
+        			         </td></tr>
           			</table> 	
                     
                 </div>

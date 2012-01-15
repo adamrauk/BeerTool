@@ -47,7 +47,7 @@
 		</script>
 
 	<body onload="displaySG(${datavals},${recipevals})">
-	<table border=0 width="100">
+	<table id="sgdisplay" border=0 width="100">
 	<tr class="prop"><td>Current SG</td>
 		<td id="sgreadings"></td></tr>
 	<tr class="prop"><td>Wort Volume</td>

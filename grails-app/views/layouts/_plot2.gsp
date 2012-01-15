@@ -10,7 +10,7 @@
 			var t = {};
 			var timerref;
 			var timerindx;
-			var hoptimer = {};
+	        var lsParams = {liquor: [], wort: []};
 			function timedCount(c,timerref,timerindx)
 			{
 					var pad = "00";
@@ -22,13 +22,14 @@
 						t[timerindx]=setTimeout("timedCount("+c+",\'"+timerref+"\',"+timerindx+")",1000);
 					}
 			}
-			
+
 			
 		   function getTargetTime() {
 			    var targetTemp = document.getElementById('targettemp').value;
 				var now = new Date();
 			    var timeoffset =  now.getTimezoneOffset()*60*1000;
-			    var predictedtime = fitLine(liquorCurrent['time'],liquorCurrent['temp'],targetTemp);
+			    lsParams['liquor'] = fitLine(liquorCurrent['time'],liquorCurrent['temp']);
+			    var predictedtime = (targetTemp - lsParams['liquor'][0]) / lsParams['liquor'][1];
 			    if ((d0+predictedtime) > (now.getTime()+timeoffset)) {
 					var c=Math.round(predictedtime/1000);
 					timedCount(Math.round(((d0+predictedtime)-(now.getTime()+timeoffset))/1000),"liquortimer",0);
@@ -39,7 +40,8 @@
 			    var targetTemp = document.getElementById('targettempwort').value;
 				var now = new Date();
 			    var timeoffset =  now.getTimezoneOffset()*60*1000;
-			    var predictedtime = fitLine(wortCurrent['time'],wortCurrent['temp'],targetTemp);
+			    lsParams['wort'] = fitLine(wortCurrent['time'],wortCurrent['temp']);
+			    var predictedtime = (targetTemp - lsParams['wort'][0]) / lsParams['wort'][1];
 			    if ((d0+predictedtime) > (now.getTime()+timeoffset)) {
 					var c=Math.round(predictedtime/1000);
 					timedCount(Math.round(((d0+predictedtime)-(now.getTime()+timeoffset))/1000),"worttimer",1);
@@ -47,28 +49,20 @@
 		   }
 
 		   </script> 
-		 <p>
-<!--		      <input class="fetchSeries" type="button" value="Show Data"> -->
-<!--  		      <a href="getData?batch.id=1">data</a> --->
-		      <span></span>
-		    </p>
     		<div id="placeholder"  style="width:400px;height:200px;"></div>
 		<div id="placeholder2"  style="width:50px;height:50px;"></div>
-	   <div id="overview" style="margin-left:50px;margin-top:20px;width:400px;height:50px"></div>
-	   Liquor Timer: <span id="liquortimer"></span> 
-	   	<br>
-	   	Temperature: <g:textField name="targettemp" value="${recipeInstance.mashTemperature}" />
-	   	<input class="timerbutton" type="button" value="Refresh Timer"">
-		<br>
-	   Wort timer: <span id="worttimer"></span> 
-	   	<br>
-	   	Temperature: <g:textField name="targettempwort" value="${recipeInstance.mashTemperature}" />
+		<table>
+			<tr><th><input class="timerbutton" type="button" value="Refresh" /></th><th>Time</th><th>Target</th></tr>
+			<tr><td>Liquor</td><td><span id="liquortimer"></span></td><td><g:textField name="targettemp" value="${recipeInstance.mashTemperature}" /></td></tr>
+			<tr><td>Wort</td><td><span id="worttimer"></span></td><td><g:textField name="targettempwort" value="${recipeInstance.mashTemperature}" /></td></tr>
+		</table><br>
+	   	
 	   <span id="clickdata"></span>
 	   <span id="txt"></span>
        	<g:set var="counter" value="${1}" />
 		<table>
-        <g:each in="${recipeInstance.recipeHops}" var="r">
-        	<g:set var="boiltimes[${counter-1}]" value="${r.boilTime}" />
+			<tr><th>Countdown</th><th>Hop Addition</th></tr>
+	        <g:each in="${recipeInstance.recipeHops}" var="r">
 			<tr><td>
             <span id="hoptimer[${r.id}]" title="${r.boilTime}"></span></td><td><g:link controller="recipeHops" action="show" id="${r.id}">${r?.encodeAsHTML()}</g:link>
         	  </td></tr>
@@ -83,9 +77,10 @@
 
 		    var options = {
 			    		selection: {mode: "x"},
-			    		legend: {container: placeholder2, noColumns: 3},
+			    		legend: {container: placeholder2, noColumns: 5},
 			    		grid: {hoverable: true, clickable: true, borderWidth: 0},
-			    		xaxis: {mode: "time"}
+			    		xaxis: {mode: "time"},
+			    		yaxis: {max: 220}
 		    		};
 
             var placeholder = $("#placeholder");
@@ -105,28 +100,32 @@
 	    	        var wortIndex=[];
 	    	        var startboil = null;
 	    	        var hopsArray = [];
+	    	        var tempPredictions = {liquor: [], wort: []};
+	    	        var d0_liquor=Number(new Date(getDateFromFormat(temparray[0].dateCreated,'yyyy-MM-ddTHH:mm:ssZ')).getTime());
 	    	        // go through Objects that are returned and convert them to a 2 dimensional vector [id, temp]
 	    			var d0 =Number(new Date(getDateFromFormat(temparray[0].dateCreated,'yyyy-MM-ddTHH:mm:ssZ')).getTime());
 	    	        for(var i=0;i<temparray.length;i++) {
 	    	   				dMilliseconds=(Number(new Date(getDateFromFormat(temparray[i].dateCreated,'yyyy-MM-ddTHH:mm:ssZ')).getTime()));
 	    	   				d=new Date(getDateFromFormat(temparray[i].dateCreated,'yyyy-MM-ddTHH:mm:ssZ'));
-
 	    	   				if (temparray[i].liquorTemperature != null) {
-	    							if (temparray[i].stage != null & temparray[i].stage != stage[stage.length-1]) {
+    								if (temparray[i].length==1) {
+    									var d0_liquor=Number(new Date(getDateFromFormat(temparray[0].dateCreated,'yyyy-MM-ddTHH:mm:ssZ')).getTime());}
+		    	   					if (temparray[i].stage != null & temparray[i].stage != stage[stage.length-1]) {
 	    				   				stage.push(null);
 	    				   				liquorTempArray.push([null,null])
 	    				   				liquorIndex.push(null)
 						    	        liquorCurrent={time: [], temp: []};
 	    				   				dCurrent=[]
-	    				    			var d0 =Number(new Date(getDateFromFormat(temparray[i].dateCreated,'yyyy-MM-ddTHH:mm:ssZ')).getTime());
-	    								}
+	    				    			var d0_liquor =Number(new Date(getDateFromFormat(temparray[i].dateCreated,'yyyy-MM-ddTHH:mm:ssZ')).getTime());
+	    							}
+    								
     								
 	    						stage.push(temparray[i].stage)
 	    		   				liquorTempArray.push([
 	    	  			   			d, 
 	    	  			   			temparray[i].liquorTemperature]);
 	    						liquorIndex.push(temparray[i].id)
-	    						liquorCurrent['time'].push(dMilliseconds-d0)
+	    						liquorCurrent['time'].push(dMilliseconds-d0_liquor)
 	    						liquorCurrent['temp'].push(temparray[i].liquorTemperature)
 	    	   				}
 	    	   				if (temparray[i].wortTemperature != null) {
@@ -136,7 +135,6 @@
     				   				dCurrentWort=[]
     				    			var d0 =Number(new Date(getDateFromFormat(temparray[i].dateCreated,'yyyy-MM-ddTHH:mm:ssZ')).getTime());
     							}
-
     							stagewort.push(temparray[i].stage)
 	    	   					wortTempArray.push([
 	    		  			   			d, 
@@ -172,23 +170,25 @@
 					
 					var now = new Date();
 					var timeoffset =  now.getTimezoneOffset()*60*1000;
-//					var predictedtime = new Date(Math.round(Number(fitLine(liquorCurrent['time'],liquorCurrent['temp'],160)))+timeoffset);
 
 					var targetTemp = document.getElementById('targettemp').value;
-					var predictedtime = fitLine(liquorCurrent['time'],liquorCurrent['temp'],targetTemp);
+				    lsParams['liquor'] = fitLine(liquorCurrent['time'],liquorCurrent['temp']);
+				    var predictedtime = (targetTemp - lsParams['liquor'][0]) / lsParams['liquor'][1];
+
+					
 //					document.getElementById('txt').innerHTML=predictedtime;
-					if ((d0+predictedtime) > (now.getTime()+timeoffset)) {
-//						document.getElementById('txt').innerHTML=new Date(Math.round(d0+predictedtime)-timeoffset);
+					if ((d0_liquor+predictedtime) > (now.getTime()+timeoffset)) {
 						clearTimeout(t[0]);
 						var c=Math.round(predictedtime/1000);
-						timedCount(Math.round(((d0+predictedtime)-(now.getTime()+timeoffset))/1000),
+						timedCount(Math.round(((d0_liquor+predictedtime)-(now.getTime()+timeoffset))/1000),
 								"liquortimer",0);
 					}
 					else {clearTimeout(t[0]); 
 						document.getElementById('liquortimer').innerHTML=""}
 
 					var targetTemp = document.getElementById('targettempwort').value;
-					var predictedtime = fitLine(wortCurrent['time'],wortCurrent['temp'],targetTemp);
+				    lsParams['wort'] = fitLine(wortCurrent['time'],wortCurrent['temp']);
+				    var predictedtime = (targetTemp - lsParams['wort'][0]) / lsParams['wort'][1];
 					if ((d0+predictedtime) > (now.getTime()+timeoffset)) {
 						clearTimeout(t[1]);
 						var c=Math.round(predictedtime/1000);
@@ -204,15 +204,41 @@
 			    	        	}
 
 		    	        }
-
 	    	        }
-					document.getElementById('txt').innerHTML=hopsinput[0].id;
 					
-
-	    	       var plot = $.plot($("#placeholder"), 
-	    	 	    	   [{label: "Liquor", color: "#0066CC", data: liquorTempArray, lines: {show: true}, points: {show: true}}, 
+					tempPredictions['liquor'].push([
+	    	            new Date(d0_liquor), lsParams['liquor'][0]+liquorCurrent['time'][0]*lsParams['liquor'][1]]);
+	    	        tempPredictions['liquor'].push([
+	    	            new Date(now.getTime()+timeoffset),  lsParams['liquor'][0]+(now.getTime()+timeoffset-d0_liquor)*lsParams['liquor'][1]]);
+					tempPredictions['wort'].push([
+	    	            new Date(d0+wortCurrent['time'][0]), lsParams['wort'][0]+wortCurrent['time'][0]*lsParams['wort'][1]]);
+	    	        tempPredictions['wort'].push([
+	    	            new Date(now.getTime()+timeoffset),  lsParams['wort'][0]+(now.getTime()+timeoffset-d0)*lsParams['wort'][1]]);
+					function updatePredictions() {
+						var now = new Date();
+		    	        tempPredictions['liquor'][1]=([
+		    	        	new Date(now.getTime()+timeoffset),  lsParams['liquor'][0]+(now.getTime()+timeoffset-d0_liquor)*lsParams['liquor'][1]]);
+		    	        tempPredictions['wort'][1]=([
+	 	    	            new Date(now.getTime()+timeoffset),  lsParams['wort'][0]+(now.getTime()+timeoffset-d0)*lsParams['wort'][1]]);
+						if (startboil != null) {
+							tempPredictions['wort'][0]=([
+							    new Date(startboil+timeoffset), 212]);
+							tempPredictions['wort'][1]=([
+							    new Date(now.getTime()+timeoffset),  212]);
+							 						
+						};
+		    	       // document.getElementById('txt').innerHTML=startboil;
+					}
+					updatePredictions();
+					
+	    	        
+	    	        var plot = $.plot($("#placeholder"), 
+	    	 	    	   [{color:"#66A3E0", data: tempPredictions['liquor'], lines: {show: true}, points: {show: false}},
+	    	 	    	   {color:"#D8AF9E", data: tempPredictions['wort'], lines: {show: true}, points: {show: false}},
+		    	 	    	{label: "Liquor", color: "#0066CC", data: liquorTempArray, lines: {show: true}, points: {show: true}}, 
 	    	 		    	{label: "Wort", color: "#B05F3C", data: wortTempArray, lines: {show: true}, points: {show: false}},
-	    	 		    	{label: "Hops", color:"#009900", data: hopsArray, lines: {show: false}, points: {show: true}}],
+	    	 		    	{label: "Hops", color:"#009900", data: hopsArray, lines: {show: false}, points: {show: true}}
+	    	 		    	],
 	    	 		    	options
 	    	 		    	);
 	    		       function showTooltip(x, y, contents) {
@@ -259,6 +285,20 @@
 	    		        	   window.location = '/BeerTool/measurement/editValue/'+indexArray[item.dataIndex]
 	    		           }
 	    		       });
+	    		       function update() {
+		    		       updatePredictions();
+	    		           plot.setData(
+	    	    	 	    	   [{color:"#66A3E0", data: tempPredictions['liquor'], lines: {show: true}, points: {show: false}},
+	    	    	 	    	   {color:"#D8AF9E", data: tempPredictions['wort'], lines: {show: true}, points: {show: false}},
+		    	    	 	    	{label: "Liquor", color: "#0066CC", data: liquorTempArray, lines: {show: true}, points: {show: true}}, 
+	    	    	 		    	{label: "Wort", color: "#B05F3C", data: wortTempArray, lines: {show: true}, points: {show: false}},
+	    	    	 		    	{label: "Hops", color:"#009900", data: hopsArray, lines: {show: false}, points: {show: true}}
+	    	    	 		    	]);
+						   plot.setupGrid();
+	    		           plot.draw();
+	    		           setTimeout(update, 250);
+	    		       }
+	    		       update();
 
 	    		       
 	            }

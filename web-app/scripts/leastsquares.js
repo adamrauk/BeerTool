@@ -1,4 +1,4 @@
-function fitLine(values_x, values_y, desired_y) {
+function fitLine(values_x, values_y) {
     var sum_x = 0;
     var sum_y = 0;
     var sum_xy = 0;
@@ -52,9 +52,7 @@ function fitLine(values_x, values_y, desired_y) {
         result_values_y.push(y);
     };
    
-    var target_x = (desired_y - b) / m;
     
-//  return [result_values_x, result_values_y];
-    return target_x;
+    return [b, m];
 }
 

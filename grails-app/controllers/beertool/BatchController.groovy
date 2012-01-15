@@ -57,14 +57,6 @@ class BatchController {
 		render datavals2
 	}
 
-	//THIS DOESN'T WORK
-	def getRecipeHops = {
-		def batch = Batch.get(params.id)
-		def recipeInstance = batch ? Recipe.getAll() : []
-		def datavals = recipeInstance ? RecipeHops.findAllByRecipe(recipeInstance) : []
-		def datavals2 = datavals as JSON
-		render datavals2
-	}
 
 	
 		

@@ -3,8 +3,12 @@ package beertool
 class RecipeGrains {
 
     static constraints = {
-		
-		targetTime(nullable:true)
+		amount()
+		amountUnits(inList: ["lb"])
+		potentialGravity(nullable:true)
+		potentialGravityUnits(nullable:true)
+		color(nullable:true)
+		colorUnits(inList: ["SRM"])
     }
 	
 	static hasMany = [grains:Grains]
@@ -12,8 +16,13 @@ class RecipeGrains {
 
 	Recipe recipe
 	Grains grains
+	String name
 	BigDecimal amount
-	BigDecimal targetTime
-	
-	String toString() {grains.name + "(" + amount+ " lb, mash time=" + targetTime + " min)"}
+	BigDecimal amountUnits
+	BigDecimal potentialGravity
+	BigDecimal potentialGravityUnits
+	BigDecimal color
+	BigDecimal colorUnits
+		
+	String toString() {grains.name + "(" + amount+ " " + amountUnits + ")"}
 }
