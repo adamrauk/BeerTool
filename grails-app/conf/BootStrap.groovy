@@ -10,7 +10,10 @@ class BootStrap {
 		def sugar1 = new beertool.Sugar(name: "DME", sugarPotential: 1.045)
 		sugar1.save()
 		
+	
     }
+
+	
     def destroy = {
     }
 }

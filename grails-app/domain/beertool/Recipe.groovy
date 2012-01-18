@@ -1,6 +1,5 @@
 package beertool
 
-
 class Recipe {
 
     static constraints = {
@@ -14,7 +13,7 @@ class Recipe {
 
 	static hasMany = [recipeGrains:RecipeGrains,
 		recipeHops:RecipeHops, recipeSugar:RecipeSugar, recipeYeast:RecipeYeast, batch:Batch]
-	
+		
 	String name
 	String style
 	BigDecimal targetSG

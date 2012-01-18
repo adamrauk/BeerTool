@@ -1,5 +1,17 @@
-#Tue Dec 06 20:50:36 CST 2011
+#Tue Jan 17 21:04:53 CST 2012
 eclipse.preferences.version=1
+encoding//.link_to_grails_plugins/jquery-1.7.1/grails-app/i18n=UTF-8
+encoding//.link_to_grails_plugins/jquery-1.7.1/grails-app/i18n/messages.properties=UTF-8
+encoding//.link_to_grails_plugins/jquery-ui-1.8.15/grails-app/i18n=UTF-8
+encoding//.link_to_grails_plugins/jquery-ui-1.8.15/grails-app/i18n/messages.properties=UTF-8
+encoding//.link_to_grails_plugins/mail-1.0/grails-app/i18n=UTF-8
+encoding//.link_to_grails_plugins/mail-1.0/grails-app/i18n/messages.properties=UTF-8
+encoding//.link_to_grails_plugins/mail-1.0/grails-app/i18n/messages_fr.properties=UTF-8
+encoding//.link_to_grails_plugins/spring-security-core-1.2.7/grails-app/i18n=UTF-8
+encoding//.link_to_grails_plugins/spring-security-core-1.2.7/grails-app/i18n/spring-security-core.properties=UTF-8
+encoding//.link_to_grails_plugins/spring-security-core-1.2.7/grails-app/i18n/spring-security-core_fr.properties=UTF-8
+encoding//.link_to_grails_plugins/spring-security-ui-0.1.2/grails-app/i18n=UTF-8
+encoding//.link_to_grails_plugins/spring-security-ui-0.1.2/grails-app/i18n/messages.spring-security-ui.properties=UTF-8
 encoding//grails-app/i18n=UTF-8
 encoding//grails-app/i18n/messages.properties=UTF-8
 encoding//grails-app/i18n/messages_da.properties=UTF-8
