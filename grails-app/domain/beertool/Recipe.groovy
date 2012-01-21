@@ -11,6 +11,7 @@ class Recipe {
 		mashTemperature(nullable:true)
     }
 
+	static belongsTo = [user:User]
 	static hasMany = [recipeGrains:RecipeGrains,
 		recipeHops:RecipeHops, recipeSugar:RecipeSugar, recipeYeast:RecipeYeast, batch:Batch]
 		

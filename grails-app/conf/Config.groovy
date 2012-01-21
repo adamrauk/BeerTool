@@ -65,6 +65,20 @@ environments {
 
 }
 
+
+grails{
+	mail {
+		host = "smtp.gmail.com"
+		port = 465
+		username = "raukbier@gmail.com"
+		password = "asdf27yo"
+		props = ["mail.smtp.auth":"true", 					   
+              "mail.smtp.socketFactory.port":"465",
+              "mail.smtp.socketFactory.class":"javax.net.ssl.SSLSocketFactory",
+              "mail.smtp.socketFactory.fallback":"false"]
+ 	}
+}
+
 // log4j configuration
 log4j = {
     // Example of changing the log pattern for the default console
@@ -93,13 +107,3 @@ log4j = {
 grails.plugins.springsecurity.userLookup.userDomainClassName = 'org.example.SecUser'
 grails.plugins.springsecurity.userLookup.authorityJoinClassName = 'org.example.SecUserSecRole'
 grails.plugins.springsecurity.authority.className = 'org.example.SecRole'
-
-// Added by the Spring Security Core plugin:
-grails.plugins.springsecurity.userLookup.userDomainClassName = 'beertool.SecUser'
-grails.plugins.springsecurity.userLookup.authorityJoinClassName = 'beertool.SecUserSecRole'
-grails.plugins.springsecurity.authority.className = 'beertool.SecRole'
-
-// Added by the Spring Security Core plugin:
-grails.plugins.springsecurity.userLookup.userDomainClassName = 'beertool.SecUser'
-grails.plugins.springsecurity.userLookup.authorityJoinClassName = 'beertool.SecUserSecRole'
-grails.plugins.springsecurity.authority.className = 'beertool.SecRole'

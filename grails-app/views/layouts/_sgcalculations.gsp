@@ -33,22 +33,28 @@
 	   		var currentSU = 1000*(adjsgVal[adjsgVal.length-1]-1)*volume[volume.length-1];
 			var targetSU = 1000*(targetSG[targetSG.length-1]-1)*targetVol[targetVol.length-1];
 			var newVol = (adjsgVal[adjsgVal.length-1]-1)*volume[volume.length-1]/(targetSG[targetSG.length-1]-1);
-	   		
+	
+			var currentSG = Math.round(adjsgVal[adjsgVal.length-1]*1000)/1000
+			
 	//		document.getElementById("sgreadings").innerHTML=adjsgVal.join();
 	//		document.write("Temperature adjusted SG: "+adjsgVal[adjsgVal.length-1]);
-			document.getElementById("sgreadings").innerHTML=Math.round(adjsgVal[adjsgVal.length-1]*1000)/1000;
+			document.getElementById("sgreadings").innerHTML = currentSG;
 			document.getElementById("wortvolume").innerHTML=volume[volume.length-1];
 			document.getElementById("targetsg").innerHTML=targetSG[targetSG.length-1];
 			document.getElementById("targetvol").innerHTML=targetVol[targetVol.length-1];
 			document.getElementById("sugarunits").innerHTML=Math.round(targetSU - currentSU);
 			document.getElementById("newvol").innerHTML=Math.round(newVol*10)/10;
+
+			if (isNaN(currentSG)) {document.getElementById("trcurrentsg").style.display="none"}
+			if (isNaN(Math.round(targetSU - currentSU))) {document.getElementById("trsugarunits").style.display="none"}
+			if (isNaN(Math.round(newVol*10)/10)) {document.getElementById("trnewvol").style.display="none"}
 			
 		}
 		</script>
 
 	<body onload="displaySG(${datavals},${recipevals})">
 	<table id="sgdisplay" border=0 width="100">
-	<tr class="prop"><td>Current SG</td>
+	<tr class="prop" id="trcurrentsg"><td>Current SG</td>
 		<td id="sgreadings"></td></tr>
 	<tr class="prop"><td>Wort Volume</td>
 		<td id="wortvolume"></td></tr>
@@ -56,9 +62,9 @@
 		<td id="targetsg"></td></tr>
 	<tr class="prop"><td>Target Volume</td>
 		<td id="targetvol"></td></tr>
-	<tr class="prop"><td>Sugar Units Off Target</td>
+	<tr class="prop" id="trsugarunits"><td>Sugar Units Off Target</td>
 		<td id="sugarunits"></td></tr>
-	<tr class="prop"><td>New Volume</td>
+	<tr class="prop" id="trnewvol"><td>New Volume</td>
 		<td id="newvol"></td></tr>
 
 	</table>

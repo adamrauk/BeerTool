@@ -25,7 +25,7 @@ class MeasurementController {
 		def measurement = new Measurement(params)
 		if (!measurement.hasErrors()&&measurement.save(flush:true)) {
 			flash.message = "Measurement added"
-			redirect(action:custom3, params: ['batch.id':measurement.batch.id])}
+			redirect(action:brew, params: ['batch.id':measurement.batch.id])}
 	}
    def save = {
         def measurementInstance = new Measurement(params)
@@ -107,7 +107,7 @@ class MeasurementController {
 			measurementInstance.properties = params
 			if (!measurementInstance.hasErrors() && measurementInstance.save(flush: true)) {
 				flash.message = "${message(code: 'default.updated.message', args: [message(code: 'measurement.label', default: 'Measurement'), measurementInstance.id])}"
-				redirect(action:custom3, params: ['batch.id':measurementInstance.batch.id])
+				redirect(action:brew, params: ['batch.id':measurementInstance.batch.id])
 			
 			}
 			else {
@@ -136,7 +136,7 @@ class MeasurementController {
 		}
 		else {
 			flash.message = "${message(code: 'default.not.found.message', args: [message(code: 'measurement.label', default: 'Measurement'), params.id])}"
-				redirect(action:custom3, params: ['batch.id':measurementInstance.batch.id])
+				redirect(action:brew, params: ['batch.id':measurementInstance.batch.id])
 		}
 	}
 	
@@ -160,35 +160,21 @@ class MeasurementController {
         }
     }
 	
-	
-	def custom2 = {
-		def measurementInstance = new Measurement()
-		measurementInstance.properties = params
-		def batch = Batch.get(params.batch.id)
-		def datavals = batch ? Measurement.findAllByBatch(batch) : []
-		def datavals2 = datavals as JSON
-		def recipevals = batch ? Recipe.getAll() : []
-		def recipevals2 = recipevals as JSON
-		
-		def batchid = params.batch.id
-		render(view: 'custom2', model: [measurementInstance: measurementInstance, datavals: datavals2,
-			batchid: batchid,  recipevals: recipevals2])
-	}
 
 	//custom3 is an attempt to use AJAX
-	def custom3 = {
+	def brew = {
 		def measurementInstance = new Measurement()
 		measurementInstance.properties = params
-		def batch = Batch.get(params.batch.id)
-		def datavals = batch ? Measurement.findAllByBatch(batch) : []
+		def batchInstance = Batch.get(params.batch.id)
+		def datavals = batchInstance ? Measurement.findAllByBatch(batchInstance) : []
 		def datavals2 = datavals as JSON
-		def recipeInstance = batch.recipe
-		def recipevals = batch ? Recipe.getAll() : []
+		def recipeInstance = batchInstance.recipe
+		def recipevals = batchInstance ? Recipe.getAll() : []
 		def recipevals2 = recipevals as JSON
-		
 		def batchid = params.batch.id
 
-		render(view: 'custom3', model: [measurementInstance: measurementInstance, datavals: datavals2,
+		render(view: 'custom3', model: [measurementInstance: measurementInstance, batchInstance: batchInstance,
+			datavals: datavals2,
 			batchid: batchid,  recipevals: recipevals2, recipeInstance: recipeInstance])
 	}
 

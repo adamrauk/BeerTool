@@ -42,6 +42,8 @@
             <g:form action="customsave" >
                 <div class="buttons">
                     <span class="button"><g:submitButton name="create" class="save" value="${message(code: 'default.button.create.label', default: 'Create')}" /></span>
+                    <span class="button"><g:link controller="recipe" action="show" params="[id: recipeInstance.id]">Recipe</g:link></span>
+                    <span class="button"><g:link controller="measurement" action="list" params="[batch: batchInstance.id]">Batch</g:link></span>
                 </div>
                 <div class="dialog">
 				<table>

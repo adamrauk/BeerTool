@@ -6,7 +6,7 @@ class Batch {
 		recipe(nullable:true)
 		name(nullable:true)
     }
-	static belongsTo = [recipe:Recipe]
+	static belongsTo = [recipe:Recipe,  user:User]
 	static hasMany = [measurement:Measurement]
 	
 	Recipe recipe
