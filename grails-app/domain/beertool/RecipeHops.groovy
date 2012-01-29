@@ -9,6 +9,7 @@ class RecipeHops {
 		amount()
 		amountUnits(inList:["oz"])
 		boilTime()
+		price(nullable:true)
     }
 	
 	static hasMany = [hops:Hops]
@@ -20,6 +21,7 @@ class RecipeHops {
 	String amountUnits
 	BigDecimal boilTime
 	BigDecimal alphaAcid
+	BigDecimal price
 	
 	String toString() {name + "(" + amount + "oz for " + boilTime + " min)"}
 }

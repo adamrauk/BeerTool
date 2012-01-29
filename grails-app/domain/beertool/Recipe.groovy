@@ -22,7 +22,5 @@ class Recipe {
 	String brewingMethod
 	BigDecimal mashTemperature
 	
-	
-	
 	String toString() {name + "(" + style + ")"}
 }

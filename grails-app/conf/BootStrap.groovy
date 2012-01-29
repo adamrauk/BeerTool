@@ -30,12 +30,17 @@ class BootStrap {
 				enabled: true).save()
 			SecUserSecRole.create adminUser, adminRole
 
-		
+			def anonymousUser = new User(
+				username: "anonymous",
+				password: springSecurityService.encodePassword(""),
+				enabled: true).save()
+			SecUserSecRole.create anonymousUser, userRole
+
 	            samples.each { username, profileAttrs ->
 					def user = new User(
 						username: username,
 						password: springSecurityService.encodePassword("s3cur3"),
-						enabled: true).save()
+						enabled: true)
 					user.save(flush:true)
 					SecUserSecRole.create user, userRole
 				}

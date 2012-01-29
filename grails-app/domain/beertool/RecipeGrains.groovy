@@ -11,7 +11,9 @@ class RecipeGrains {
 		potentialGravityUnits(nullable:true)
 		color(nullable:true)
 		colorUnits(inList: ["SRM"])
+		price(nullable:true)
 		recipe(nullable:true)
+		
     }
 	
 	static hasMany = [grains:Grains]
@@ -26,6 +28,7 @@ class RecipeGrains {
 	String potentialGravityUnits
 	BigDecimal color
 	String colorUnits
-		
+	BigDecimal price
+			
 	String toString() {name + "(" + amount+ " " + amountUnits + ")"}
 }
