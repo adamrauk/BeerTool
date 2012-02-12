@@ -14,8 +14,8 @@ class BootStrap {
 		sugar1.save()
 		
 		def samples = [
-			'Alex':[fullName: 'Alex Smith', email:'alex@sf.com'],
-			'Eli':[fullName: 'Eli Manning', email:'eli@ny.com']]
+			'Alex':[fullName: 'Alex Smith'],
+			'Eli':[fullName: 'Eli Manning']]
 
         def userRole = getOrCreateRole("ROLE_USER")
         def adminRole = getOrCreateRole("ROLE_ADMIN")

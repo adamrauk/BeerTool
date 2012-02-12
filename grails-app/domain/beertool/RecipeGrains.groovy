@@ -13,6 +13,7 @@ class RecipeGrains {
 		colorUnits(inList: ["SRM"])
 		price(nullable:true)
 		recipe(nullable:true)
+		comment(nullable:true)
 		
     }
 	
@@ -29,6 +30,7 @@ class RecipeGrains {
 	BigDecimal color
 	String colorUnits
 	BigDecimal price
+	String comment
 			
 	String toString() {name + "(" + amount+ " " + amountUnits + ")"}
 }

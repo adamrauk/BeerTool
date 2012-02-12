@@ -9,6 +9,8 @@ class Recipe {
 		targetSG(nullable:true)
 		targetVolume(nullable:true)
 		mashTemperature(nullable:true)
+		boilTime(nullable:true)
+    	comment(nullable:true)
     }
 
 	static belongsTo = [user:User]
@@ -21,6 +23,8 @@ class Recipe {
 	BigDecimal targetVolume
 	String brewingMethod
 	BigDecimal mashTemperature
+	String boilTime
+	String comment
 	
 	String toString() {name + "(" + style + ")"}
 }

@@ -11,6 +11,7 @@ class RecipeSugar {
 		potentialGravity(nullable:true)
 		potentialGravityUnits(inList:["GU"])
 		price(nullable:true)
+		comment(nullable:true)
     }
 	
 	static hasMany = [sugar:Sugar]
@@ -24,6 +25,7 @@ class RecipeSugar {
 	String potentialGravityUnits
 	BigDecimal boilTime
 	BigDecimal price
+	String comment
 	
 	String toString() {name + "(" + amount + " lb, boil time=" + boilTime + "min)" }
 }

@@ -16,14 +16,42 @@ class BatchController {
 	   return userInstance
 	}
 
+	def saveEfficiency = {
+		def batchInstance=Batch.get(params.id)
+		def currentUser=currentUser()
+		def batchUser = batchInstance.user
+		if (currentUser != batchUser) {
+			flash.message = "You are not allowed to modify someone else's batch."
+			redirect(action: "list")
+		 }
+		else {
+			batchInstance.mashEfficiency=params.efficiency
+			if (batchInstance.save(flush: true)) {
+				flash.message = "${message(code: 'default.created.message', args: [message(code: 'batch.label', default: 'Batch'), batchInstance.id])}"
+//				redirect(action: "show", id: batchInstance.id)
+				redirect(controller: "measurement", action:"brew", params: ['batch.id':batchInstance.id])
+			}
+			else {
+				render(view: "create", model: [batchInstance: batchInstance])
+			}
+		}
+	}
+	
     def index = {
         redirect(action: "list", params: params)
     }
 
+	@Secured(['IS_AUTHENTICATED_FULLY'])
     def list = {
+		def currentUser=currentUser()
         params.max = Math.min(params.max ? params.int('max') : 10, 100)
-        [batchInstanceList: Batch.list(params), batchInstanceTotal: Batch.count()]
+        render(view: "list", model: [batchInstanceList: currentUser?.batch?.asList(), batchInstanceTotal: Batch.count()])
+		
     }
+	def listall = {
+		params.max = Math.min(params.max ? params.int('max') : 10, 100)
+		[batchInstanceList: Batch.list(params), batchInstanceTotal: Batch.count()]
+	}
 
 	@Secured(['IS_AUTHENTICATED_FULLY'])
 	def listmy = {
@@ -44,12 +72,14 @@ class BatchController {
         def batchInstance = new Batch(params)
         if (batchInstance.save(flush: true)) {
             flash.message = "${message(code: 'default.created.message', args: [message(code: 'batch.label', default: 'Batch'), batchInstance.id])}"
-            redirect(action: "show", id: batchInstance.id)
+//            redirect(action: "show", id: batchInstance.id)
+			redirect(controller: "measurement", action:"brew", params: ['batch.id':batchInstance.id])
         }
         else {
             render(view: "create", model: [batchInstance: batchInstance])
         }
     }
+	
 
     def show = {
         def batchInstance = Batch.get(params.id)
@@ -120,6 +150,7 @@ class BatchController {
 	@Secured(['IS_AUTHENTICATED_FULLY'])
     def delete = {
         def batchInstance = Batch.get(params.id)
+		def currentUser=currentUser()
 		def batchUser = batchInstance.user
 		if (currentUser != batchUser) {
 			flash.message = "You are not allowed to delete someone else's batch."

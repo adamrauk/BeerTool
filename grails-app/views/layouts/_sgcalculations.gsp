@@ -1,8 +1,9 @@
+<!-- CALCULATE EFFICIENCY AND SEND AJAX POST TO batch/saveEfficiency/ -->
 <div id="sgcalculations">
     	<script language="javascript" type="text/javascript" src="/BeerTool/scripts/jquery.js"></script>
    	 	<script language="javascript" type="text/javascript" src="/BeerTool/scripts/jquery.flot.js"></script>
    	 	<script language="javascript" type="text/javascript" src="/BeerTool/scripts/date.js"></script>
-		<script type="text/javascript">
+		<script type="text/javascript">	
 		function displaySG(temparray,recipearray)
 		{
 	        var sgVal = [];

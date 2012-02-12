@@ -1,8 +1,20 @@
 package beertool
+import grails.plugins.springsecurity.Secured;
 
 import grails.converters.JSON
 
 class MeasurementController {
+	def springSecurityService
+	
+	private currentUser() {
+		def auth = springSecurityService.authentication
+		def userInstance
+		if (auth.name != 'anonymousUser') {
+			 userInstance= User.get(springSecurityService.principal.id)
+		}
+		else {userInstance=User.findWhere(username: 'anonymous')}
+	   return userInstance}
+
 
     static allowedMethods = [save: "POST", update: "POST", delete: "POST"]
 
@@ -15,17 +27,42 @@ class MeasurementController {
         [measurementInstanceList: Measurement.list(params), measurementInstanceTotal: Measurement.count()]
     }
 
+	def listbatch = {
+		def batchInstance = Batch.get(params.batch.id)
+        params.max = Math.min(params.max ? params.int('max') : 10, 100)
+		render(view:"list", model:[measurementInstanceList: batchInstance?.measurement?.asList(), measurementInstanceTotal: batchInstance?.measurement?.count()])
+	}
+	
     def create = {
         def measurementInstance = new Measurement()
-        measurementInstance.properties = params
-        return [measurementInstance: measurementInstance]
+		def batchInstance = measurementInstance.batch
+		def currentUser=currentUser()
+		def batchUser=batchInstance.user
+		if (currentUser != batchUser) {
+	       flash.message = "You are not allowed to edit someone else's batch."
+           redirect(action: "list")
+		}
+		else {
+	        measurementInstance.properties = params
+	        return [measurementInstance: measurementInstance]
+		}
     }
 
  	def customsave = {
 		def measurement = new Measurement(params)
-		if (!measurement.hasErrors()&&measurement.save(flush:true)) {
-			flash.message = "Measurement added"
-			redirect(action:brew, params: ['batch.id':measurement.batch.id])}
+		def batchInstance = measurement.batch
+		def currentUser=currentUser()
+		def batchUser=batchInstance.user
+		if (currentUser != batchUser) {
+	       flash.message = "You are not allowed to edit someone else's batch."
+           redirect(action: "list")
+		}
+		else {
+			if (!measurement.hasErrors()&&measurement.save(flush:true)) {
+				flash.message = "Measurement added"
+				redirect(action:brew, params: ['batch.id':measurement.batch.id])
+				}
+		}
 	}
    def save = {
         def measurementInstance = new Measurement(params)
@@ -127,11 +164,11 @@ class MeasurementController {
 			try {
 				measurementInstance.delete(flush: true)
 				flash.message = "${message(code: 'default.deleted.message', args: [message(code: 'measurement.label', default: 'Measurement'), params.id])}"
-				redirect(action:custom3, params: ['batch.id':measurementInstance.batch.id])
+				redirect(action:brew, params: ['batch.id':measurementInstance.batch.id])
 			}
 			catch (org.springframework.dao.DataIntegrityViolationException e) {
 				flash.message = "${message(code: 'default.not.deleted.message', args: [message(code: 'measurement.label', default: 'Measurement'), params.id])}"
-				redirect(action:custom3, params: ['batch.id':measurementInstance.batch.id])
+				redirect(action:brew, params: ['batch.id':measurementInstance.batch.id])
 			}
 		}
 		else {
@@ -172,8 +209,8 @@ class MeasurementController {
 		def recipevals = batchInstance ? Recipe.getAll() : []
 		def recipevals2 = recipevals as JSON
 		def batchid = params.batch.id
-
-		render(view: 'custom3', model: [measurementInstance: measurementInstance, batchInstance: batchInstance,
+		render(view: 'custom3', model: [measurementInstance: measurementInstance, 
+			batchInstance: batchInstance,
 			datavals: datavals2,
 			batchid: batchid,  recipevals: recipevals2, recipeInstance: recipeInstance])
 	}
@@ -194,21 +231,26 @@ class MeasurementController {
 
 	def getHops = {
 		def batch = Batch.get(params.batch.id)
-		def hopvals = batch ? RecipeHops.getAll() : []
+		def recipeInstance = batch.recipe
+		def hopvals = recipeInstance ? RecipeHops.getAll() : []
 		def hopvals2 = hopvals as JSON
-		render(hopvals2)
+		def recipe = recipeInstance.recipeHops as JSON
+		render(recipe)
 	}
 
 	
 	def getBatch = {
 		def batch = Batch.get(params.batch.id)
+		def recipeInstance = batch.recipe
 		def recipevals = batch ? Recipe.getAll() : []
 		def recipevals2 = recipevals as JSON
 		def datavals = batch ? Measurement.findAllByBatch(batch) : []
 		def datavals2 = datavals as JSON
-		def hopvals = batch ? RecipeHops.getAll() : []
+		def hopvals = recipeInstance.recipeHops
 		def hopvals2 = hopvals as JSON
-		render([recipevals2, datavals2, hopvals2])
+		def grainvals = recipeInstance.recipeGrains
+		def grainvals2 = grainvals as JSON
+		render([recipevals2, datavals2, hopvals2, grainvals2])
 	}
 		
 
