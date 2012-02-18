@@ -162,4 +162,64 @@ class RecipeController {
 	        }
 		}
     }
+
+	
+	def copy = {
+		def recipeInstance = Recipe.get(params.id)
+	/*	def newRecipeInstance=recipeInstance.getClass().newInstance()
+		newRecipeInstance.properties=recipeInstance.properties
+		newRecipeInstance.batch=null;
+		recipeInstance?.recipeGrains.each{prop ->
+			def newRecipeGrains=prop.getClass().newInstance()
+			newRecipeGrains.properties=prop.properties
+		}*/
+		def newRecipeInstance=deepClone(recipeInstance)
+		if (newRecipeInstance.save(flush: true)) {
+			flash.message = "${message(code: 'default.created.message', args: [message(code: 'recipe.label', default: 'Recipe'), recipeInstance.id])}"
+			 redirect(action: 'edit', params: ['id':newRecipeInstance.id])
+		}
+		else {
+			render(view: "create", model: [recipeInstance: newRecipeInstance])
+		}
+
+	}
+	
+	def deepClone(domainInstanceToClone){
+		//Our target instance for the instance we want to clone
+		def newDomainInstance = domainInstanceToClone.getClass().newInstance()
+		
+		//Returns a DefaultGrailsDomainClass (as interface GrailsDomainClass) for inspecting properties
+		def domainClass = ApplicationHolder.application.getDomainClass(newDomainInstance.getClass().name)
+		
+		domainClass?.persistentProperties.each{prop ->
+			if(prop.association){
+				if(prop.owningSide){
+					//we have to deep clone owned associations
+					if(prop.oneToOne){
+						def newAssociationInstance = deepClone(domainInstanceToClone."${prop.name}")
+						newDomainInstance."${prop.name}" = newAssociationInstance
+					}
+					else{
+						domainInstanceToClone."${prop.name}".each{ associationInstance ->
+							def newAssociationInstance = deepClone(associationInstance)
+							newDomainInstance."addTo${StringUtils.capitalize(prop.name)}"(newAssociationInstance)
+						}
+					}
+				}
+				else{
+					if(!prop.bidirectional){
+						//If the association isn't owned or the owner, then we can just do a  shallow copy of the reference.
+						newDomainInstance."${prop.name}" = domainInstanceToClone."${prop.name}"
+					}
+				}
+			}
+			else{
+				//If the property isn't an association then simply copy the value
+				newDomainInstance."${prop.name}" = domainInstanceToClone."${prop.name}"
+			}
+		}
+	
+		return newDomainInstance
+	}
+	
 }

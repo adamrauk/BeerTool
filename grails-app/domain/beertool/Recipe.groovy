@@ -9,6 +9,7 @@ class Recipe {
 		targetSG(nullable:true)
 		targetVolume(nullable:true)
 		mashTemperature(nullable:true)
+		mashTime(nullable:true)
 		boilTime(nullable:true)
     	comment(nullable:true)
     }
@@ -23,6 +24,7 @@ class Recipe {
 	BigDecimal targetVolume
 	String brewingMethod
 	BigDecimal mashTemperature
+	String mashTime
 	String boilTime
 	String comment
 	

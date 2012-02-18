@@ -11,10 +11,11 @@ class Batch {
 	static hasMany = [measurement:Measurement]
 	
 	Recipe recipe
+	User user
 	String name
 	Date lastUpdated
 	Date dateCreated
 	String mashEfficiency
 	
-	String toString() {name}
+	String toString() {id + " - " + name + "(" + user + ")"}
 }

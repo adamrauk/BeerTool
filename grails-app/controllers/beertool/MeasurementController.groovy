@@ -87,21 +87,32 @@ class MeasurementController {
         }
     }
 
+	@Secured(['IS_AUTHENTICATED_FULLY'])
 	def editValue = {
         def measurementInstance = Measurement.get(params.id)
 		render(view: 'editValue', model: [measurementInstance: measurementInstance])
 	}
+	@Secured(['IS_AUTHENTICATED_FULLY'])
     def edit = {
         def measurementInstance = Measurement.get(params.id)
-        if (!measurementInstance) {
-            flash.message = "${message(code: 'default.not.found.message', args: [message(code: 'measurement.label', default: 'Measurement'), params.id])}"
-            redirect(action: "list")
-        }
-        else {
-            return [measurementInstance: measurementInstance]
-        }
+		def currentUser = currentUser()
+		def measurementUser=measurementInstance.batch.user
+		if (currentUser != measurementUser) {
+			flash.message = "You are not allowed to edit someone else's batch."
+			redirect(action: "list")
+		 }
+		 else {
+	        if (!measurementInstance) {
+	            flash.message = "${message(code: 'default.not.found.message', args: [message(code: 'measurement.label', default: 'Measurement'), params.id])}"
+	            redirect(action: "list")
+	        }
+	        else {
+	            return [measurementInstance: measurementInstance]
+	        }
+		 }
     }
 
+	@Secured(['IS_AUTHENTICATED_FULLY'])
     def update = {
         def measurementInstance = Measurement.get(params.id)
         if (measurementInstance) {
@@ -129,6 +140,7 @@ class MeasurementController {
         }
     }
 	
+	@Secured(['IS_AUTHENTICATED_FULLY'])
 	def customupdate = {
 		def measurementInstance = Measurement.get(params.id)
 		if (measurementInstance) {
@@ -158,43 +170,61 @@ class MeasurementController {
 	}
 
 
+	@Secured(['IS_AUTHENTICATED_FULLY'])
 	def customdelete = {
 		def measurementInstance = Measurement.get(params.id)
-		if (measurementInstance) {
-			try {
-				measurementInstance.delete(flush: true)
-				flash.message = "${message(code: 'default.deleted.message', args: [message(code: 'measurement.label', default: 'Measurement'), params.id])}"
-				redirect(action:brew, params: ['batch.id':measurementInstance.batch.id])
+		def currentUser = currentUser()
+		def measurementUser=measurementInstance.batch.user
+		if (currentUser != measurementUser) {
+			flash.message = "You are not allowed to edit someone else's batch."
+			redirect(action: "list")
+		 }
+		 else {
+			if (measurementInstance) {
+				try {
+					measurementInstance.delete(flush: true)
+					flash.message = "${message(code: 'default.deleted.message', args: [message(code: 'measurement.label', default: 'Measurement'), params.id])}"
+					redirect(action:brew, params: ['batch.id':measurementInstance.batch.id])
+				}
+				catch (org.springframework.dao.DataIntegrityViolationException e) {
+					flash.message = "${message(code: 'default.not.deleted.message', args: [message(code: 'measurement.label', default: 'Measurement'), params.id])}"
+					redirect(action:brew, params: ['batch.id':measurementInstance.batch.id])
+				}
 			}
-			catch (org.springframework.dao.DataIntegrityViolationException e) {
-				flash.message = "${message(code: 'default.not.deleted.message', args: [message(code: 'measurement.label', default: 'Measurement'), params.id])}"
-				redirect(action:brew, params: ['batch.id':measurementInstance.batch.id])
+			else {
+				flash.message = "${message(code: 'default.not.found.message', args: [message(code: 'measurement.label', default: 'Measurement'), params.id])}"
+					redirect(action:brew, params: ['batch.id':measurementInstance.batch.id])
 			}
-		}
-		else {
-			flash.message = "${message(code: 'default.not.found.message', args: [message(code: 'measurement.label', default: 'Measurement'), params.id])}"
-				redirect(action:brew, params: ['batch.id':measurementInstance.batch.id])
-		}
+		 }
 	}
 	
 
+	@Secured(['IS_AUTHENTICATED_FULLY'])
     def delete = {
         def measurementInstance = Measurement.get(params.id)
-        if (measurementInstance) {
-            try {
-                measurementInstance.delete(flush: true)
-                flash.message = "${message(code: 'default.deleted.message', args: [message(code: 'measurement.label', default: 'Measurement'), params.id])}"
-                redirect(action: "list")
-            }
-            catch (org.springframework.dao.DataIntegrityViolationException e) {
-                flash.message = "${message(code: 'default.not.deleted.message', args: [message(code: 'measurement.label', default: 'Measurement'), params.id])}"
-                redirect(action: "show", id: params.id)
-            }
-        }
-        else {
-            flash.message = "${message(code: 'default.not.found.message', args: [message(code: 'measurement.label', default: 'Measurement'), params.id])}"
-            redirect(action: "list")
-        }
+		def currentUser = currentUser()
+		def measurementUser=measurementInstance.batch.user
+		if (currentUser != measurementUser) {
+			flash.message = "You are not allowed to edit someone else's batch."
+			redirect(action: "list")
+		 }
+		 else {
+	        if (measurementInstance) {
+	            try {
+	                measurementInstance.delete(flush: true)
+	                flash.message = "${message(code: 'default.deleted.message', args: [message(code: 'measurement.label', default: 'Measurement'), params.id])}"
+	                redirect(action: "list")
+	            }
+	            catch (org.springframework.dao.DataIntegrityViolationException e) {
+	                flash.message = "${message(code: 'default.not.deleted.message', args: [message(code: 'measurement.label', default: 'Measurement'), params.id])}"
+	                redirect(action: "show", id: params.id)
+	            }
+	        }
+	        else {
+	            flash.message = "${message(code: 'default.not.found.message', args: [message(code: 'measurement.label', default: 'Measurement'), params.id])}"
+	            redirect(action: "list")
+	        }
+		 }
     }
 	
 

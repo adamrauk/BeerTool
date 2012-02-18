@@ -38,6 +38,7 @@
 				  $("#SGTempEntry").show();
 				  $("#enterdata").css({"background-color":"#FFFFFF"});
 			  });
+			  
 			});
 
 		</script>        
@@ -90,6 +91,11 @@
 			{
 			background:#AACCEE;
 			}
+			#graphboiltimer
+			{
+			cursor:default;
+			}
+			
 		</style>
         
     </head>
@@ -111,8 +117,11 @@
             </g:hasErrors>
             <g:form action="customsave" >
 					<div id="placeholder"  style="width:650px;height:200px;"></div>
-					<div id="placeholder2"  style="width:50px;height:50px;"></div>
-                <div class="buttons">
+					<div style="position:relative;">
+						<div id="placeholder2"  style="width:50px;height:25px;"></div>
+						<div id="messages"  style="position:absolute;top:0px;right:0px;width:400px;height:25px;"></div>
+					</div>					
+                <div class="buttons" style="clear:both;">
                     <span class="button"><g:submitButton name="create" class="save" value="${message(code: 'default.button.create.label', default: 'Create')}" /></span>
                     <span class="button" style="float: right"><g:link class="edit" controller="batch" action="show" params="[id: batchInstance.id]">Edit Batch</g:link></span>
 
@@ -206,15 +215,16 @@
 
 
               			<g:render template="/layouts/plot2" />
-					    	<table>
-								<tr><th><input class="timerbutton" type="button" value="Refresh" /></th><th>Time</th><th>Target</th></tr>
-								<tr><td>Liquor</td><td><span id="liquortimer"></span></td><td><g:textField name="targettemp" value="${recipeInstance.mashTemperature}" /></td></tr>
-								<tr><td>Wort</td><td><span id="worttimer"></span></td><td><g:textField name="targettempwort" value="${recipeInstance.mashTemperature}" /></td></tr>
+					    	<table width="100">
+								<tr><th>Target:</th><th>Liquor</th><th>Wort</th></tr>
+								<tr><td><input class="timerbutton" type="button" value="Refresh" /></td>
+									<td><g:textField name="targettemp" value="${recipeInstance.mashTemperature}" style="width:40px" /></td>
+									<td><g:textField name="targettempwort" value="${recipeInstance.mashTemperature}" style="width:40px" /></td></tr>
 							</table><br>
 						   	
 						   <span id="clickdata"></span>
-						   <span id="txt"></span>
-							<div style="float:left; padding:2px"> Boil Timer   </div><span id="boiltimer"></span>
+						   <span id="txt"></span><br>
+						   <span id="txt2"></span>
 							
 							<table>
 								<tr><th>Countdown</th><th>Hop Addition</th></tr>

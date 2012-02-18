@@ -10,20 +10,21 @@
 			var t = {};
 	        var timerref;
 			var timerindx;
-			function timedCount(cinput,timerref,timerindx) /*c=seconds, timerref=id of timer, timerindx=index number of timeout*/
+			function timedCount(cinput,timerref,timerindx) /*cinput=targettime, timerref=id of timer, timerindx=index number of timeout*/
 			{
 			
 				var now = new Date();
 				var c=(Number(cinput)*1000-Number(now.getTime()+now.getTimezoneOffset()*60*1000))/1000;
-			
-					var pad = "00";
-					var seconds=""+Math.round(c%60);
-					var minutes=Math.floor(c/60);
-					document.getElementById(timerref).innerHTML=minutes+":"+pad.substring(0,pad.length-seconds.length)+seconds;
-				//	c=c-1;
-					if(c>=0) {
-						t[timerindx]=setTimeout("timedCount("+cinput+",\'"+timerref+"\',"+timerindx+")",1000);
-					}
+				var pad = "00";
+				var seconds=""+Math.round(c%60);
+				var minutes=Math.floor(c/60);
+				document.getElementById(timerref).innerHTML=minutes+":"+pad.substring(0,pad.length-seconds.length)+seconds;
+				if(c>=0) {
+					t[timerindx]=setTimeout("timedCount("+cinput+",\'"+timerref+"\',"+timerindx+")",1000);
+				}
+				else {
+					document.getElementById(timerref).innerHTML="";
+				}
 			}
 
 			/*Obtain target time for liquor*/
@@ -77,9 +78,11 @@
 	  			var wortTempArray = [];
 	  	        var wortIndex=[];
 	  	        var startboil = null;
+	  	        var startmash = null;
 	  	        var hopsArray = [];
 	  	        var tempPredictions = {liquor: [], wort: []};
 	  	        var boillength = recipeinput[0].boilTime;
+	  	        var mashlength = recipeinput[0].mashTime;
 		   	    	 
 				/*var liquortimes=[];
 				for (var i=1;i<measurementinput.length;i++) {
@@ -87,7 +90,8 @@
 				}
 				document.getElementById("txt").innerHTML=Math.min(liquortimes);*/
 				var d0_liquor=Number(new Date(getDateFromFormat(measurementinput[0].dateCreated,'yyyy-MM-ddTHH:mm:ssZ')).getTime());
-   			
+				var d0_wort;
+				
    			// go through Objects that are returned and convert them to a 2 dimensional vector [id, temp]
    			var d0 =Number(new Date(getDateFromFormat(measurementinput[0].dateCreated,'yyyy-MM-ddTHH:mm:ssZ')).getTime());
    	        for(var i=0;i<measurementinput.length;i++) {
@@ -131,16 +135,19 @@
 					if (measurementinput[i].stage == "Boil" & startboil == null) {
 						var startboil = new Date(getDateFromFormat(measurementinput[i].dateCreated,'yyyy-MM-ddTHH:mm:ssZ'))
 					}
+					if (measurementinput[i].stage == "Mash" & startmash == null) {
+						var startmash = new Date(getDateFromFormat(measurementinput[i].dateCreated,'yyyy-MM-ddTHH:mm:ssZ'))
+					}
    	   				if (measurementinput[i].wortTemperature == null & measurementinput[i].stage == "Boil") {
 						if (measurementinput[i].stage != null & measurementinput[i].stage != stagewort[stagewort.length-1]) {
 				   			wortCurrent={time: [], temp: []}
 				   			dCurrentWort=[]
-				    		var d0 =Number(new Date(getDateFromFormat(measurementinput[i].dateCreated,'yyyy-MM-ddTHH:mm:ssZ')).getTime());
+				    		var d0_wort =Number(new Date(getDateFromFormat(measurementinput[i].dateCreated,'yyyy-MM-ddTHH:mm:ssZ')).getTime());
 						}
 						stagewort.push(measurementinput[i].stage)
    	   					wortTempArray.push([d, 212]);
 	  			   		wortIndex.push(measurementinput[i].id)
-   						wortCurrent['time'].push(dMilliseconds-d0)
+   						wortCurrent['time'].push(dMilliseconds-d0_wort)
    						wortCurrent['temp'].push(212)
 					}
    	        }
@@ -157,68 +164,51 @@
 			var now = new Date();
 			var timeoffset =  now.getTimezoneOffset()*60*1000;
 			
-
 			var targetTemp = document.getElementById('targettemp').value;
 		    lsParams['liquor'] = fitLine(liquorCurrent['time'],liquorCurrent['temp']);
-		    var predictedtime = (targetTemp - lsParams['liquor'][0]) / lsParams['liquor'][1];
-			if ((d0_liquor+predictedtime) > (now.getTime()+timeoffset)) {
-				clearTimeout(t[0]);
-				var c=Math.round(predictedtime/1000);
-				timedCount(Math.round(((d0_liquor+predictedtime))/1000),
-					"liquortimer",0);
-			}
-			else {clearTimeout(t[0]); 
-				document.getElementById('liquortimer').innerHTML="done"
-			}
+		    var predictedtime_liquor = (targetTemp - lsParams['liquor'][0]) / lsParams['liquor'][1];
 
 			var targetTemp = document.getElementById('targettempwort').value;
 		    lsParams['wort'] = fitLine(wortCurrent['time'],wortCurrent['temp']);
-		    var predictedtime = (targetTemp - lsParams['wort'][0]) / lsParams['wort'][1];
-			if ((d0+predictedtime) > (now.getTime()+timeoffset)) {
-				clearTimeout(t[1]);
-				var c=Math.round(predictedtime/1000);
-				timedCount(Math.round(((d0+predictedtime))/1000),"worttimer",1);
-			}
-			else {clearTimeout(t[1]); 
-				document.getElementById('worttimer').innerHTML="done"
-				$("#worttimer").css({"background-color":"Yellow"});
-			}
+		    var predictedtime_wort = (targetTemp - lsParams['wort'][0]) / lsParams['wort'][1];
 
-  	        if (startboil != null) {
-    	        for(var i=0;i<hopsinput.length;i++) {
-    	        	if (Number(startboil.getTime())+Number((boillength-hopsinput[i].boilTime)*60*1000) > (now.getTime()+timeoffset)) {
-    	        		timedCount(Math.round(((Number(startboil.getTime())+Number((boillength-hopsinput[i].boilTime)*60*1000)))/1000),"hoptimer["+hopsinput[i].id+"]",i+2);
-	    	        }
-    	        }
-   	        	if (Number(startboil.getTime())+Number(boillength*60*1000) > (now.getTime()+timeoffset)) {
-   	        		timedCount(Math.round(((Number(startboil.getTime())+Number(boillength*60*1000)))/1000),"boiltimer",hopsinput.length+3);
-    	        }
-   	        };
-
-				
+			tempPredictions['wort'].push([null,null]);
+			tempPredictions['wort'].push([null,null]);
+			tempPredictions['liquor'].push([null,null]);
+			tempPredictions['liquor'].push([null,null]);
+			
 				if (Math.round((now.getTime()+timeoffset-d0_liquor-Math.max.apply(Math,liquorCurrent['time']))/1000) < 60*60) {
-					tempPredictions['liquor'].push([
+					tempPredictions['liquor'][0]=([
 	    	            new Date(d0_liquor), lsParams['liquor'][0]+liquorCurrent['time'][0]*lsParams['liquor'][1]]);
-	    	        tempPredictions['liquor'].push([
+	    	        tempPredictions['liquor'][1]=([
 	    	            new Date(now.getTime()+timeoffset),  lsParams['liquor'][0]+(now.getTime()+timeoffset-d0_liquor)*lsParams['liquor'][1]]);
 				}
-				if (Math.round((now.getTime()+timeoffset-d0-Math.max.apply(Math,wortCurrent['time']))/1000) < 60*60) {
-					tempPredictions['wort'].push([
-	    	            new Date(d0+wortCurrent['time'][0]), lsParams['wort'][0]+wortCurrent['time'][0]*lsParams['wort'][1]]);
-	    	        tempPredictions['wort'].push([
-	    	            new Date(now.getTime()+timeoffset),  lsParams['wort'][0]+(now.getTime()+timeoffset-d0)*lsParams['wort'][1]]);
+				if (Math.round((now.getTime()+timeoffset-d0_wort-Math.max.apply(Math,wortCurrent['time']))/1000) < 60*60) {
+					tempPredictions['wort'][0]=([
+	    	            new Date(d0_wort+wortCurrent['time'][0]), lsParams['wort'][0]+wortCurrent['time'][0]*lsParams['wort'][1]]);
+	    	        tempPredictions['wort'][1]=([
+	    	            new Date(now.getTime()+timeoffset),  lsParams['wort'][0]+(now.getTime()+timeoffset-d0_wort)*lsParams['wort'][1]]);
 				}
 				function updatePredictions() {
 					var now = new Date();
+					var timeoffset =  now.getTimezoneOffset()*60*1000;
+					
 					if (Math.round((now.getTime()+timeoffset-d0_liquor-Math.max.apply(Math,liquorCurrent['time']))/1000) < 60*60) {
 		    	        tempPredictions['liquor'][1]=([
 		    	        	new Date(now.getTime()+timeoffset),  lsParams['liquor'][0]+(now.getTime()+timeoffset-d0_liquor)*lsParams['liquor'][1]]);
 					}
-					if (Math.round((now.getTime()+timeoffset-d0-Math.max.apply(Math,wortCurrent['time']))/1000) < 60*60) {
+					if (Math.round((now.getTime()+timeoffset-d0_wort-Math.max.apply(Math,wortCurrent['time']))/1000) < 60*60) {
 		    	        tempPredictions['wort'][1]=([
-	 	    	            new Date(now.getTime()+timeoffset),  lsParams['wort'][0]+(now.getTime()+timeoffset-d0)*lsParams['wort'][1]]);
+	 	    	            new Date(now.getTime()+timeoffset),  lsParams['wort'][0]+(now.getTime()+timeoffset-d0_wort)*lsParams['wort'][1]]);
 					} 	
-					if (startboil != null & Math.round((now.getTime()+timeoffset-d0-Math.max.apply(Math,wortCurrent['time']))/1000) < boillength*60) {
+					if (startboil != null & Math.round((now.getTime()+timeoffset-d0_wort-Math.max.apply(Math,wortCurrent['time']))/1000) <= boillength*60) {
+						if (Math.round((Number(startboil.getTime())+Number(boillength*60*1000))/100) == Math.round((now.getTime()+timeoffset)/100)) {
+							$.ajax({
+				                url: "/BeerTool/measurement/customsave?batch.id=${batchid}&stage=Boil",
+				                method: 'GET'
+				            });
+				            window.location.reload();
+						}
 						tempPredictions['wort'][0]=([
 						    new Date(startboil+timeoffset), 212]);
 						tempPredictions['wort'][1]=([
@@ -280,15 +270,66 @@
 		    		           }
    		           }
    		       });
-   		       
-	           boilval=document.getElementById("boiltimer").innerHTML;
-		       if (boilval != '') {
-				    var o;
-				    o = plot.pointOffset({ x: tempPredictions['wort'][1][0], y: 200});
-   			       $("#placeholder").append('<div id="graphboiltimer" style="position:absolute;left:' + (o.left) + 'px;top:' + o.top + 'px;color:#666;font-size:smaller">' + boilval + '</div>');
-   			    }
+   		       $("#placeholder").append('<div id="graphboiltimer" style="position:absolute;left: 0px;top: 0px;color:#666;font-size:medium"></div>');
+   		       $("#placeholder").append('<div id="graphmashtimer" style="position:absolute;left: 0px;top: 0px;color:#666;font-size:medium"></div>');
+   		       $("#placeholder").append('<div id="graphliquortimer" style="position:absolute;left: 0px;top: 0px;color:#666;font-size:medium"></div>');
+  		       $("#placeholder").append('<div id="graphworttimer" style="position:absolute;left: 0px;top: 0px;color:#666;font-size:medium"></div>');
+
+
+				if ((d0_liquor+predictedtime_liquor) > (now.getTime()+timeoffset)) {
+					clearTimeout(t[0]);
+					var c=Math.round(predictedtime_liquor/1000);
+					timedCount(Math.round(((d0_liquor+predictedtime_liquor))/1000),
+						"graphliquortimer",0);
+				}
+				else {clearTimeout(t[0]); 
+					document.getElementById('graphliquortimer').innerHTML=""
+				}
+
+				if ((d0_wort+predictedtime_wort) > (now.getTime()+timeoffset)) {
+					clearTimeout(t[1]);
+					var c=Math.round(predictedtime_wort/1000);
+					timedCount(Math.round(((d0_wort+predictedtime_wort))/1000),"graphworttimer",1);
+				}
+				else {clearTimeout(t[1]); 
+					document.getElementById('graphworttimer').innerHTML=""
+				}
+
+	  	        if (startmash != null) {
+	  	        	if (Number(startmash.getTime())+Number(mashlength*60*1000) > (now.getTime()+timeoffset)) {
+	   	        		timedCount(Math.round(((Number(startmash.getTime())+Number(mashlength*60*1000)))/1000),"graphmashtimer",2);
+	    	        }
+	  	        }
+
+	  	        if (startboil != null) {
+		  	        clearTimeout(t[2])
+	    	        for(var i=0;i<hopsinput.length;i++) {
+	    	        	if (Number(startboil.getTime())+Number((boillength-hopsinput[i].boilTime)*60*1000) > (now.getTime()+timeoffset)) {
+	    	        		timedCount(Math.round(((Number(startboil.getTime())+Number((boillength-hopsinput[i].boilTime)*60*1000)))/1000),"hoptimer["+hopsinput[i].id+"]",i+2);
+		    	        }
+	    	        }
+	   	        	if (Number(startboil.getTime())+Number(boillength*60*1000) > (now.getTime()+timeoffset)) {
+	   	        		timedCount(Math.round(((Number(startboil.getTime())+Number(boillength*60*1000)))/1000),"graphboiltimer",hopsinput.length+3);
+	    	        }
+	    	        document.getElementById("messages").innerHTML="Boiling";
+	   	        };
+
    		       function update() {
 		   		     updatePredictions();
+   			       boilval=document.getElementById("graphboiltimer").innerHTML;
+   			        var o;
+   			        var o2;
+		           if (boilval != '') {
+		   				$("#graphboiltimer").css({"position":"absolute","margin-left":"30%", "top": "10%", "font-family": "Verana", "font-size": "100px", "opacity":"0.3"});
+	   			        document.getElementById("graphboiltimer").innerHTML=boilval;
+	   			    }
+	   				$("#graphmashtimer").css({"position":"absolute","margin-left":"30%", "top": "10%", "font-family": "Verana", "font-size": "100px", "opacity":"0.3"});
+				    o = plot.pointOffset({ x: tempPredictions['liquor'][1][0], y: tempPredictions['liquor'][1][1]});
+	   				$("#graphliquortimer").css({"position":"absolute","left":(o.left) +"px", "top": o.top + "px"});
+				    o2 = plot.pointOffset({ x: tempPredictions['wort'][1][0], y: tempPredictions['wort'][1][1]});
+	   				$("#graphworttimer").css({"position":"absolute","left":(o2.left) +"px", "top": o2.top + "px"});
+					
+
    		           plot.setData(
    	    	 	    	   [{color:"#66A3E0", data: tempPredictions['liquor'], lines: {show: true}, points: {show: false}},
    	    	 	    	   {color:"#D8AF9E", data: tempPredictions['wort'], lines: {show: true}, points: {show: false}},
@@ -298,14 +339,7 @@
    	    	 		    	]);
 					   plot.setupGrid();
    		           plot.draw();
-   			       boilval=document.getElementById("boiltimer").innerHTML;
-		           if (boilval != '') {
-					    var o;
-					    o = plot.pointOffset({ x: tempPredictions['wort'][1][0], y: 200});
-	   					$("#graphboiltimer").css({"position":"absolute","left":(o.left) +"px", "top": o.top + "px"});
-	   			        document.getElementById("graphboiltimer").innerHTML=boilval;
-
-	   			    }
+	   			    
 		           setTimeout(update, 10);
    		       }
    		       update();
