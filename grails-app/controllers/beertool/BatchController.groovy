@@ -60,6 +60,23 @@ class BatchController {
 		render(view: "list", model: [batchInstanceList: currentUser?.batch?.asList(), batchInstanceTotal: Batch.count()])
 	}
 
+	@Secured(['IS_AUTHENTICATED_FULLY'])
+	def listfollowing = {
+		def currentUser=currentUser()
+		def batches = []
+		if (currentUser.following) {
+			batches = Batch.withCriteria {
+				'in'("user", currentUser.following)
+				order("dateCreated", "desc")
+			}
+		}
+		params.max = Math.min(params.max ? params.int('max') : 10, 100)
+//		[ posts: posts, postCount: posts.size() ]
+
+		render(view: "list", model: [batchInstanceList: batches, batchInstanceTotal: Batch.count()])
+	}
+
+
 	def create = {
 		def batchInstance = new Batch()
 		def currentUser = currentUser()
@@ -70,12 +87,14 @@ class BatchController {
 
     def save = {
         def batchInstance = new Batch(params)
+        def recipeInstance = batchInstance.recipe
         if (batchInstance.save(flush: true)) {
             flash.message = "${message(code: 'default.created.message', args: [message(code: 'batch.label', default: 'Batch'), batchInstance.id])}"
 //            redirect(action: "show", id: batchInstance.id)
-			redirect(controller: "measurement", action:"brew", params: ['batch.id':batchInstance.id])
-        }
-        else {
+//			redirect(controller: "measurement", action:"brew", params: ['batch.id':batchInstance.id])
+ 			redirect(action:"showrecipe", id: batchInstance.id,  model: [batchInstance: batchInstance, recipeInstance: recipeInstance])
+       }
+		else {
             render(view: "create", model: [batchInstance: batchInstance])
         }
     }
@@ -91,6 +110,19 @@ class BatchController {
             [batchInstance: batchInstance]
         }
     }
+	
+	def showrecipe={
+		def batchInstance = Batch.get(params.id)
+        def recipeInstance = batchInstance.recipe
+		if (!batchInstance) {
+			flash.message = "${message(code: 'default.not.found.message', args: [message(code: 'batch.label', default: 'Batch'), params.id])}"
+			redirect(action: "list")
+		}
+		else {
+			[batchInstance: batchInstance, recipeInstance: recipeInstance]
+		}
+
+	}
 
     def edit = {
         def batchInstance = Batch.get(params.id)

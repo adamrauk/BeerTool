@@ -299,10 +299,12 @@
 	  	        	if (Number(startmash.getTime())+Number(mashlength*60*1000) > (now.getTime()+timeoffset)) {
 	   	        		timedCount(Math.round(((Number(startmash.getTime())+Number(mashlength*60*1000)))/1000),"graphmashtimer",2);
 	    	        }
+	    	        $('#messages').append('Started mash<br>')
 	  	        }
 
 	  	        if (startboil != null) {
 		  	        clearTimeout(t[2])
+		  	        document.getElementById('graphmashtimer').innerHTML="";
 	    	        for(var i=0;i<hopsinput.length;i++) {
 	    	        	if (Number(startboil.getTime())+Number((boillength-hopsinput[i].boilTime)*60*1000) > (now.getTime()+timeoffset)) {
 	    	        		timedCount(Math.round(((Number(startboil.getTime())+Number((boillength-hopsinput[i].boilTime)*60*1000)))/1000),"hoptimer["+hopsinput[i].id+"]",i+2);
@@ -311,7 +313,7 @@
 	   	        	if (Number(startboil.getTime())+Number(boillength*60*1000) > (now.getTime()+timeoffset)) {
 	   	        		timedCount(Math.round(((Number(startboil.getTime())+Number(boillength*60*1000)))/1000),"graphboiltimer",hopsinput.length+3);
 	    	        }
-	    	        document.getElementById("messages").innerHTML="Boiling";
+	    	        $('#messages').append('Boiling<br>')
 	   	        };
 
    		       function update() {
@@ -320,21 +322,25 @@
    			        var o;
    			        var o2;
 		           if (boilval != '') {
-		   				$("#graphboiltimer").css({"position":"absolute","margin-left":"30%", "top": "10%", "font-family": "Verana", "font-size": "100px", "opacity":"0.3"});
+		   				$("#graphboiltimer").css({"position":"absolute","margin-left":"30%", 
+		   					"top": "10%", "font-family": "Verana", "font-size": "100px", "opacity":"0.5", "color": "#666666"});
 	   			        document.getElementById("graphboiltimer").innerHTML=boilval;
 	   			    }
-	   				$("#graphmashtimer").css({"position":"absolute","margin-left":"30%", "top": "10%", "font-family": "Verana", "font-size": "100px", "opacity":"0.3"});
+	   				$("#graphmashtimer").css({"position":"absolute","margin-left":"30%", "top": "10%", "font-family": "Verana", "font-size": "100px", 
+	   					"opacity":"0.5", "color": "#666666"})
 				    o = plot.pointOffset({ x: tempPredictions['liquor'][1][0], y: tempPredictions['liquor'][1][1]});
 	   				$("#graphliquortimer").css({"position":"absolute","left":(o.left) +"px", "top": o.top + "px"});
 				    o2 = plot.pointOffset({ x: tempPredictions['wort'][1][0], y: tempPredictions['wort'][1][1]});
 	   				$("#graphworttimer").css({"position":"absolute","left":(o2.left) +"px", "top": o2.top + "px"});
 					
-
+/*					var mytext=document.createTextNode("test")
+	    	        document.getElementById("messages").appendChild(mytext);
+					$('#messages').append('test<br>')*/
    		           plot.setData(
    	    	 	    	   [{color:"#66A3E0", data: tempPredictions['liquor'], lines: {show: true}, points: {show: false}},
    	    	 	    	   {color:"#D8AF9E", data: tempPredictions['wort'], lines: {show: true}, points: {show: false}},
-	    	    	 	    	{label: "Liquor", color: "#0066CC", data: liquorTempArray, lines: {show: true}, points: {show: true}}, 
-   	    	 		    	{label: "Wort", color: "#B05F3C", data: wortTempArray, lines: {show: true}, points: {show: false}},
+	    	    	 	    	{label: "Liquor", color: "#0066CC", data: liquorTempArray, lines: {show: true}, points: {radius: 2, show: true}}, 
+   	    	 		    	{label: "Wort", color: "#B05F3C", data: wortTempArray, lines: {show: true}, points: {radius: 2, show: true}},
    	    	 		    	{label: "Hops", color:"#009900", data: hopsArray, lines: {show: false}, points: {show: true}}
    	    	 		    	]);
 					   plot.setupGrid();

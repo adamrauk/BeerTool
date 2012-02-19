@@ -118,8 +118,8 @@
             <g:form action="customsave" >
 					<div id="placeholder"  style="width:650px;height:200px;"></div>
 					<div style="position:relative;">
-						<div id="placeholder2"  style="width:50px;height:25px;"></div>
-						<div id="messages"  style="position:absolute;top:0px;right:0px;width:400px;height:25px;"></div>
+						<div id="placeholder2"  style="width:50px;height:50px;"></div>
+						<div id="messages"  style="position:absolute;top:0px;right:0px;width:400px;height:50px;overflow-y:scroll;"></div>
 					</div>					
                 <div class="buttons" style="clear:both;">
                     <span class="button"><g:submitButton name="create" class="save" value="${message(code: 'default.button.create.label', default: 'Create')}" /></span>

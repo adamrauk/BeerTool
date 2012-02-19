@@ -8,7 +8,7 @@ class RecipeGrains {
 		amount()
 		amountUnits(inList: ["lb"])
 		potentialGravity(nullable:true)
-		potentialGravityUnits(nullable:true)
+		potentialGravityUnits(nullable:true, inList: ["GU"])
 		color(nullable:true)
 		colorUnits(inList: ["SRM"])
 		price(nullable:true)

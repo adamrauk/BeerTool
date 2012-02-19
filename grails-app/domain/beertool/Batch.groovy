@@ -5,6 +5,7 @@ class Batch {
     static constraints = {
 		recipe(nullable:true)
 		name(nullable:true)
+		volume(nullable:false)
 		mashEfficiency(nullable:true)
     }
 	static belongsTo = [recipe:Recipe,  user:User]
@@ -13,6 +14,7 @@ class Batch {
 	Recipe recipe
 	User user
 	String name
+	BigDecimal volume
 	Date lastUpdated
 	Date dateCreated
 	String mashEfficiency

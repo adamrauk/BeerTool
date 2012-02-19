@@ -1,5 +1,7 @@
 package beertool
 
+import java.util.Date;
+
 class Recipe {
 
     static constraints = {
@@ -27,6 +29,8 @@ class Recipe {
 	String mashTime
 	String boilTime
 	String comment
+	Date lastUpdated
+	Date dateCreated
 	
 	String toString() {name + "(" + style + ")"}
 }
