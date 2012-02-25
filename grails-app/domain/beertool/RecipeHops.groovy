@@ -3,21 +3,17 @@ package beertool
 class RecipeHops {
 
     static constraints = {
-		hops(nullable:true)
 		name()
 		hopUse(inList: ["Boil","Dry Hop","Mash","First Wort","Aroma"])
-		alphaAcid()
+		alphaAcid(nullable:true)
 		amount()
 		amountUnits(inList:["oz"])
-		boilTime()
+		boilTime(nullable:true)
 		price(nullable:true)
 		comment(nullable:true)
     }
 	
-	static hasMany = [hops:Hops]
-	
 	Recipe recipe
-	Hops hops
 	String name
 	BigDecimal amount
 	String amountUnits

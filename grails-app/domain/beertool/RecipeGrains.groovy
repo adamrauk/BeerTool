@@ -3,12 +3,11 @@ package beertool
 class RecipeGrains {
 
     static constraints = {
-		grains(nullable:true)
 		name(nullable:true)
 		amount()
 		amountUnits(inList: ["lb"])
 		potentialGravity(nullable:true)
-		potentialGravityUnits(nullable:true, inList: ["GU"])
+		potentialGravityUnits(inList: ["GU"])
 		color(nullable:true)
 		colorUnits(inList: ["SRM"])
 		price(nullable:true)
@@ -17,11 +16,9 @@ class RecipeGrains {
 		
     }
 	
-	static hasMany = [grains:Grains]
 	static belongsTo = [recipe:Recipe]
 
 	Recipe recipe
-	Grains grains
 	String name
 	BigDecimal amount
 	String amountUnits

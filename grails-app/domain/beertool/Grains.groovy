@@ -4,12 +4,12 @@ class Grains {
 
     static constraints = {
 		color(nullable:true)
-		sugarPotential(nullable:true)
+		potentialGravity(nullable:true)
     }
 	
 	String name
 	BigDecimal color
-	BigDecimal sugarPotential
+	BigDecimal potentialGravity
 	
 	String toString() {name}
 }

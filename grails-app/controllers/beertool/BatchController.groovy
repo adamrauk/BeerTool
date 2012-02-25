@@ -57,7 +57,11 @@ class BatchController {
 	def listmy = {
 		def currentUser=currentUser()
 		params.max = Math.min(params.max ? params.int('max') : 10, 100)
-		render(view: "list", model: [batchInstanceList: currentUser?.batch?.asList(), batchInstanceTotal: Batch.count()])
+		def myBatches=Batch.withCriteria{
+			'in'("user",currentUser)
+			order("dateCreated","desc")
+		}
+		render(view: "list", model: [batchInstanceList: myBatches, batchInstanceTotal: myBatches.size()])
 	}
 
 	@Secured(['IS_AUTHENTICATED_FULLY'])
@@ -101,25 +105,28 @@ class BatchController {
 	
 
     def show = {
-        def batchInstance = Batch.get(params.id)
+        /*def batchInstance = Batch.get(params.id)
         if (!batchInstance) {
             flash.message = "${message(code: 'default.not.found.message', args: [message(code: 'batch.label', default: 'Batch'), params.id])}"
             redirect(action: "list")
         }
         else {
             [batchInstance: batchInstance]
-        }
+        }*/
+		redirect(action: "showrecipe", id: params.id)
     }
 	
 	def showrecipe={
 		def batchInstance = Batch.get(params.id)
         def recipeInstance = batchInstance.recipe
+		def currentUser = currentUser()
+		def batchUser = batchInstance.user
 		if (!batchInstance) {
 			flash.message = "${message(code: 'default.not.found.message', args: [message(code: 'batch.label', default: 'Batch'), params.id])}"
 			redirect(action: "list")
 		}
 		else {
-			[batchInstance: batchInstance, recipeInstance: recipeInstance]
+			[batchInstance: batchInstance, recipeInstance: recipeInstance, currentUser:currentUser, batchUser:batchUser]
 		}
 
 	}
@@ -166,7 +173,7 @@ class BatchController {
 	            batchInstance.properties = params
 	            if (!batchInstance.hasErrors() && batchInstance.save(flush: true)) {
 	                flash.message = "${message(code: 'default.updated.message', args: [message(code: 'batch.label', default: 'Batch'), batchInstance.id])}"
-	                redirect(action: "show", id: batchInstance.id)
+	                redirect(action: "showrecipe", id: batchInstance.id)
 	            }
 	            else {
 	                render(view: "edit", model: [batchInstance: batchInstance, currentUser: currentUser])
@@ -197,7 +204,7 @@ class BatchController {
 	            }
 	            catch (org.springframework.dao.DataIntegrityViolationException e) {
 	                flash.message = "${message(code: 'default.not.deleted.message', args: [message(code: 'batch.label', default: 'Batch'), params.id])}"
-	                redirect(action: "show", id: params.id)
+	                redirect(action: "showrecipe", id: params.id)
 	            }
 	        }
 	        else {

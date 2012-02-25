@@ -6,7 +6,7 @@ class Sugar {
     }
 	
 	String name
-	BigDecimal sugarPotential
+	BigDecimal potentialGravity
 
 		String toString() {name}
 }

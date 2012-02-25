@@ -3,7 +3,7 @@ package beertool
 import java.util.Date;
 
 class Recipe {
-
+	static searchable = true
     static constraints = {
 		name(nullable: true)
 		style()
@@ -14,6 +14,7 @@ class Recipe {
 		mashTime(nullable:true)
 		boilTime(nullable:true)
     	comment(nullable:true)
+		parent(nullable:true)
     }
 
 	static belongsTo = [user:User]
@@ -31,6 +32,7 @@ class Recipe {
 	String comment
 	Date lastUpdated
 	Date dateCreated
+	Integer parent
 	
 	String toString() {name + "(" + style + ")"}
 }

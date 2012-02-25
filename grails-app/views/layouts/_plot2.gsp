@@ -6,7 +6,14 @@
    	 	<script type="text/javascript" src="/BeerTool/scripts/leastsquares.js"></script>
 
 			<script type="text/javascript">
-	        var lsParams = {liquor: [], wort: []};
+			var messagearray=[]
+			messagearray.push({stage: null, time: null, message: "Begin by taking a temperature reading of your liquor (water).<br>", done: 0});
+			/*function addMessage(currentstage, currenttime) {
+			messagearray.push({stage: null, time: 0, message: "After a few minutes, take another temperature measurement and a timer will be created that predicts when the temperature below is reached.<br>", done: 0});
+
+			}
+			*/
+			var lsParams = {liquor: [], wort: []};
 			var t = {};
 	        var timerref;
 			var timerindx;
@@ -63,37 +70,42 @@
 
 	        var placeholder = $("#placeholder"); /*variable reference to plot placeholder div object*/
 			var dataurl = "getBatch?batch.id=${batchid}";
+	        $('#messages').prepend('Begin by taking a temperature reading of your liquor (water).<br>')
 			
-           function onDataReceived(temparray2) {
-	            var recipeinput = temparray2[0];
-	            var measurementinput = temparray2[1];
-	            var hopsinput = temparray2[2];
-	            var grainsinput = temparray2[3];
-	  	        var stage = [];
-	  	        var stagewort = [];
-	  	        var liquorTempArray = [];
-	  	        var liquorIndex=[];
-	  	        var liquorCurrent={time: [], temp: []};
-	  	        var wortCurrent={time: [], temp: []};
-	  			var wortTempArray = [];
-	  	        var wortIndex=[];
-	  	        var startboil = null;
-	  	        var startmash = null;
-	  	        var hopsArray = [];
-	  	        var tempPredictions = {liquor: [], wort: []};
-	  	        var boillength = recipeinput[0].boilTime;
-	  	        var mashlength = recipeinput[0].mashTime;
-		   	    	 
-				/*var liquortimes=[];
-				for (var i=1;i<measurementinput.length;i++) {
-					liquortimes.push(Number(new Date(getDateFromFormat(measurementinput[i].dateCreated,'yyyy-MM-ddTHH:mm:ssZ')).getTime()));
-				}
-				document.getElementById("txt").innerHTML=Math.min(liquortimes);*/
-				var d0_liquor=Number(new Date(getDateFromFormat(measurementinput[0].dateCreated,'yyyy-MM-ddTHH:mm:ssZ')).getTime());
-				var d0_wort;
-				
-   			// go through Objects that are returned and convert them to a 2 dimensional vector [id, temp]
-   			var d0 =Number(new Date(getDateFromFormat(measurementinput[0].dateCreated,'yyyy-MM-ddTHH:mm:ssZ')).getTime());
+    function onDataReceived(temparray2) {
+	        var recipeinput = temparray2[0];
+            var measurementinput = temparray2[1];
+            var hopsinput = temparray2[2];
+            var grainsinput = temparray2[3];
+  	        var stage = [];
+  	        var stagewort = [];
+  	        var liquorTempArray = [];
+  	        var liquorIndex=[];
+  	        var liquorCurrent={time: [], temp: []};
+  	        var wortCurrent={time: [], temp: []};
+  			var wortTempArray = [];
+  	        var wortIndex=[];
+  	        var startboil = null;
+  	        var startmash = null;
+  	        var hopsArray = [];
+  	        var tempPredictions = {liquor: [], wort: []};
+  	        var boillength = recipeinput[0].boilTime;
+  	        var mashlength = recipeinput[0].mashTime;
+	   	    	 
+			/*var liquortimes=[];
+			for (var i=1;i<measurementinput.length;i++) {
+				liquortimes.push(Number(new Date(getDateFromFormat(measurementinput[i].dateCreated,'yyyy-MM-ddTHH:mm:ssZ')).getTime()));
+			}
+			document.getElementById("txt").innerHTML=Math.min(liquortimes);*/
+
+			if (measurementinput.length) {$('#messages').prepend('After a few minutes, take another temperature measurement and a timer will be created that predicts when the temperature below is reached.<br>')};
+
+			var d0_liquor=null
+			if (measurementinput.length) {d0_liquor=Number(new Date(getDateFromFormat(measurementinput[0].dateCreated,'yyyy-MM-ddTHH:mm:ssZ')).getTime())};
+			var d0_wort;
+			
+   			var d0 =null
+   			if (measurementinput.length) {d0=Number(new Date(getDateFromFormat(measurementinput[0].dateCreated,'yyyy-MM-ddTHH:mm:ssZ')).getTime())}
    	        for(var i=0;i<measurementinput.length;i++) {
    	   				d=new Date(getDateFromFormat(measurementinput[i].dateCreated,'yyyy-MM-ddTHH:mm:ssZ'));
    	   				dMilliseconds=Number(d.getTime());
@@ -166,11 +178,13 @@
 			
 			var targetTemp = document.getElementById('targettemp').value;
 		    lsParams['liquor'] = fitLine(liquorCurrent['time'],liquorCurrent['temp']);
-		    var predictedtime_liquor = (targetTemp - lsParams['liquor'][0]) / lsParams['liquor'][1];
+		    var predictedtime_liquor = null
+		    if (measurementinput.length) {predictedtime_liquor=(targetTemp - lsParams['liquor'][0]) / lsParams['liquor'][1]};
 
 			var targetTemp = document.getElementById('targettempwort').value;
 		    lsParams['wort'] = fitLine(wortCurrent['time'],wortCurrent['temp']);
-		    var predictedtime_wort = (targetTemp - lsParams['wort'][0]) / lsParams['wort'][1];
+			var predictedtime_wort = null
+		    if (measurementinput.length) {predictedtime_wort = (targetTemp - lsParams['wort'][0]) / lsParams['wort'][1]};
 
 			tempPredictions['wort'].push([null,null]);
 			tempPredictions['wort'].push([null,null]);
@@ -299,7 +313,7 @@
 	  	        	if (Number(startmash.getTime())+Number(mashlength*60*1000) > (now.getTime()+timeoffset)) {
 	   	        		timedCount(Math.round(((Number(startmash.getTime())+Number(mashlength*60*1000)))/1000),"graphmashtimer",2);
 	    	        }
-	    	        $('#messages').append('Started mash<br>')
+	    	        $('#messages').prepend('Started mash<br>')
 	  	        }
 
 	  	        if (startboil != null) {
@@ -313,11 +327,11 @@
 	   	        	if (Number(startboil.getTime())+Number(boillength*60*1000) > (now.getTime()+timeoffset)) {
 	   	        		timedCount(Math.round(((Number(startboil.getTime())+Number(boillength*60*1000)))/1000),"graphboiltimer",hopsinput.length+3);
 	    	        }
-	    	        $('#messages').append('Boiling<br>')
+	    	        $('#messages').prepend('Boiling<br>')
 	   	        };
 
    		       function update() {
-		   		     updatePredictions();
+		   		   updatePredictions();
    			       boilval=document.getElementById("graphboiltimer").innerHTML;
    			        var o;
    			        var o2;

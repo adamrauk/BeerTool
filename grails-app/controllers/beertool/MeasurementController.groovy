@@ -3,6 +3,7 @@ import grails.plugins.springsecurity.Secured;
 
 import grails.converters.JSON
 
+
 class MeasurementController {
 	def springSecurityService
 	

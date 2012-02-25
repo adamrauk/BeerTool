@@ -1,5 +1,6 @@
 package beertool;
 import grails.plugins.springsecurity.Secured;
+import org.springframework.util.StringUtils;
 
 class RecipeController {
 	def springSecurityService
@@ -37,14 +38,21 @@ class RecipeController {
 	
     def listall = {
         params.max = Math.min(params.max ? params.int('max') : 10, 100)
-        render(view: "list", model: [recipeInstanceList: Recipe.list(params), recipeInstanceTotal: Recipe.count()])
+		def allRecipes=Recipe.withCriteria{
+			order("dateCreated","desc")
+		}
+        render(view: "list", model: [recipeInstanceList: allRecipes, recipeInstanceTotal: Recipe.count()])
     }
 
 	@Secured(['IS_AUTHENTICATED_FULLY'])
 	def listmy = {
 		def currentUser=currentUser()
+		def myRecipes=Recipe.withCriteria{
+			'in'("user",currentUser)
+			order("dateCreated","desc")
+		}
 		params.max = Math.min(params.max ? params.int('max') : 10, 100)
-		render(view: "list", model: [recipeInstanceList: currentUser?.recipe?.asList(), recipeInstanceTotal: Recipe.count()])
+		render(view: "list", model: [recipeInstanceList: myRecipes, recipeInstanceTotal: myRecipes.size()])
 	}
 
 	@Secured(['IS_AUTHENTICATED_FULLY'])
@@ -69,12 +77,14 @@ class RecipeController {
 
     def show = {
         def recipeInstance = Recipe.get(params.id)
+		def currentUser = currentUser();
+		def recipeUser = recipeInstance.user;
         if (!recipeInstance) {
             flash.message = "${message(code: 'default.not.found.message', args: [message(code: 'recipe.label', default: 'Recipe'), params.id])}"
             redirect(action: "list")
         }
         else {
-            [recipeInstance: recipeInstance]
+            [recipeInstance: recipeInstance, currentUser:currentUser, recipeUser:recipeUser]
         }
     }
 
@@ -166,17 +176,13 @@ class RecipeController {
 	
 	def copy = {
 		def recipeInstance = Recipe.get(params.id)
-	/*	def newRecipeInstance=recipeInstance.getClass().newInstance()
-		newRecipeInstance.properties=recipeInstance.properties
-		newRecipeInstance.batch=null;
-		recipeInstance?.recipeGrains.each{prop ->
-			def newRecipeGrains=prop.getClass().newInstance()
-			newRecipeGrains.properties=prop.properties
-		}*/
+		def currentUser = currentUser()
 		def newRecipeInstance=deepClone(recipeInstance)
+		newRecipeInstance.user=currentUser
+		newRecipeInstance.parent=recipeInstance.id
 		if (newRecipeInstance.save(flush: true)) {
 			flash.message = "${message(code: 'default.created.message', args: [message(code: 'recipe.label', default: 'Recipe'), recipeInstance.id])}"
-			 redirect(action: 'edit', params: ['id':newRecipeInstance.id])
+			 redirect(action: 'show', params: ['id':newRecipeInstance.id])
 		}
 		else {
 			render(view: "create", model: [recipeInstance: newRecipeInstance])
@@ -189,9 +195,9 @@ class RecipeController {
 		def newDomainInstance = domainInstanceToClone.getClass().newInstance()
 		
 		//Returns a DefaultGrailsDomainClass (as interface GrailsDomainClass) for inspecting properties
-		def domainClass = ApplicationHolder.application.getDomainClass(newDomainInstance.getClass().name)
+		def domainClass = grailsApplication.getDomainClass(newDomainInstance.getClass().name)
 		
-		domainClass?.persistentProperties.each{prop ->
+		domainClass.getPersistentProperties().each{prop ->
 			if(prop.association){
 				if(prop.owningSide){
 					//we have to deep clone owned associations
