@@ -1,7 +1,9 @@
 package beertool
+import grails.plugins.springsecurity.Secured;
 
 class GrainsController {
-
+	def springSecurityService
+	
 	static scaffold=true
     static allowedMethods = [save: "POST", update: "POST", delete: "POST"]
 
@@ -14,6 +16,7 @@ class GrainsController {
         [grainsInstanceList: Grains.list(params), grainsInstanceTotal: Grains.count()]
     }
 
+	@Secured(['ROLE_ADMIN'])
     def create = {
         def grainsInstance = new Grains()
         grainsInstance.properties = params
@@ -42,6 +45,7 @@ class GrainsController {
         }
     }
 
+	@Secured(['ROLE_ADMIN'])
     def edit = {
         def grainsInstance = Grains.get(params.id)
         if (!grainsInstance) {
@@ -53,6 +57,7 @@ class GrainsController {
         }
     }
 
+	@Secured(['ROLE_ADMIN'])
     def update = {
         def grainsInstance = Grains.get(params.id)
         if (grainsInstance) {
@@ -80,6 +85,7 @@ class GrainsController {
         }
     }
 
+	@Secured(['ROLE_ADMIN'])
     def delete = {
         def grainsInstance = Grains.get(params.id)
         if (grainsInstance) {

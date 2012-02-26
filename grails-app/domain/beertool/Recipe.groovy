@@ -34,5 +34,5 @@ class Recipe {
 	Date dateCreated
 	Integer parent
 	
-	String toString() {name + "(" + style + ")"}
+	String toString() {name + " (" + style + ") from " + user}
 }

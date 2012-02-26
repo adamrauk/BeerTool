@@ -3,7 +3,6 @@ package beertool
 class RecipeSugar {
 
     static constraints = {
-		sugar(nullable:true)
 		name()
 		amount()
 		amountUnits(inList:["lb","oz"])
@@ -14,10 +13,9 @@ class RecipeSugar {
 		comment(nullable:true)
     }
 	
-	static hasMany = [sugar:Sugar]
+	static belongsTo = [recipe:Recipe]
 	
 	Recipe recipe
-	Sugar sugar
 	String name
 	BigDecimal amount
 	String amountUnits

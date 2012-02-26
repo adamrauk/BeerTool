@@ -12,6 +12,7 @@ class Measurement {
 		specificGravity(nullable:true)
 		specificGravityTemperature(nullable:true)
 		dateAdded(nullable:true, attributes: [precision:"minute"])
+		note(nullable:true)
     }
 	
 	static belongsTo = [batch:Batch]
@@ -26,5 +27,6 @@ class Measurement {
 	Date lastUpdated
 	Date dateCreated 
 	Date dateAdded = new Date()
+	String note
 	
 }

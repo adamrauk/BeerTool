@@ -153,13 +153,13 @@ class RecipeController {
 		if (currentUser != recipeUser) {
 			flash.message = "You are not allowed to delete someone else's recipe."
 			redirect(action: "list")
-		 } 
+		 }
 		else {
 	        if (recipeInstance) {
 	            try {
 	                recipeInstance.delete(flush: true)
 	                flash.message = "${message(code: 'default.deleted.message', args: [message(code: 'recipe.label', default: 'Recipe'), params.id])}"
-	                redirect(action: "list")
+	                redirect(controller: "main", action: "index")
 	            }
 	            catch (org.springframework.dao.DataIntegrityViolationException e) {
 	                flash.message = "${message(code: 'default.not.deleted.message', args: [message(code: 'recipe.label', default: 'Recipe'), params.id])}"
@@ -168,7 +168,7 @@ class RecipeController {
 	        }
 	        else {
 	            flash.message = "${message(code: 'default.not.found.message', args: [message(code: 'recipe.label', default: 'Recipe'), params.id])}"
-	            redirect(action: "list")
+	            redirect(controller: "main", action: "index")
 	        }
 		}
     }
@@ -180,14 +180,14 @@ class RecipeController {
 		def newRecipeInstance=deepClone(recipeInstance)
 		newRecipeInstance.user=currentUser
 		newRecipeInstance.parent=recipeInstance.id
+		newRecipeInstance.batch=null
 		if (newRecipeInstance.save(flush: true)) {
 			flash.message = "${message(code: 'default.created.message', args: [message(code: 'recipe.label', default: 'Recipe'), recipeInstance.id])}"
-			 redirect(action: 'show', params: ['id':newRecipeInstance.id])
+			 redirect(action: 'edit', params: ['id':newRecipeInstance.id])
 		}
 		else {
 			render(view: "create", model: [recipeInstance: newRecipeInstance])
 		}
-
 	}
 	
 	def deepClone(domainInstanceToClone){

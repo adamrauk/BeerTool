@@ -200,7 +200,7 @@ class BatchController {
 	            try {
 	                batchInstance.delete(flush: true)
 	                flash.message = "${message(code: 'default.deleted.message', args: [message(code: 'batch.label', default: 'Batch'), params.id])}"
-	                redirect(action: "list")
+	                redirect(controller: "main", action: "index")
 	            }
 	            catch (org.springframework.dao.DataIntegrityViolationException e) {
 	                flash.message = "${message(code: 'default.not.deleted.message', args: [message(code: 'batch.label', default: 'Batch'), params.id])}"

@@ -9,7 +9,7 @@ class Batch {
 		mashEfficiency(nullable:true)
     }
 	static belongsTo = [recipe:Recipe,  user:User]
-	static hasMany = [measurement:Measurement]
+	static hasMany = [measurement:Measurement, tastingNote:TastingNote]
 	
 	Recipe recipe
 	User user

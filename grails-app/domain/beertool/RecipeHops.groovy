@@ -12,7 +12,9 @@ class RecipeHops {
 		price(nullable:true)
 		comment(nullable:true)
     }
-	
+
+	static belongsTo = [recipe:Recipe]
+		
 	Recipe recipe
 	String name
 	BigDecimal amount
