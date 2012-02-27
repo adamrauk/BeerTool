@@ -4,8 +4,8 @@ dataSource {
     username = "sa"
     password = ""*/
 	driverClassName = "com.mysql.jdbc.Driver"
-	username = "grails"
-	password = "server"
+	username = "adamrauk_grails"
+	password = "s3cur3"
 }
 hibernate {
     cache.use_second_level_cache = true
@@ -18,21 +18,21 @@ environments {
         dataSource {
             dbCreate = "create-drop" // one of 'create', 'create-drop','update'
             //url = "jdbc:hsqldb:file:devDB"
-			url = "jdbc:mysql://localhost:3306/beertool_dev?autoreconnect=true"
+			url = "jdbc:mysql://brewmashter.com:3306/adamrauk_brewmashter_dev?autoreconnect=true"
         }
     }
     test {
         dataSource {
             dbCreate = "create-drop"
             //url = "jdbc:hsqldb:mem:testDb"
-			url = "jdbc:mysql://localhost:3306/beertool_dev?autoreconnect=true"
+			url = "jdbc:mysql://brewmashter.com:3306/adamrauk_brewmashter_test?autoreconnect=true"
         }
     }
     production {
         dataSource {
             dbCreate = "update"
             //url = "jdbc:hsqldb:file:prodDb;shutdown=true"
- 			url = "jdbc:mysql://localhost:3306/beertool_dev?autoreconnect=true"
+ 			url = "jdbc:mysql://brewmashter.com:3306/adamrauk_brewmashter_prod?autoreconnect=true"
        }
     }
 }
