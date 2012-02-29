@@ -27,6 +27,8 @@
             <g:form method="post" >
                 <g:hiddenField name="id" value="${measurementInstance?.id}" />
                 <g:hiddenField name="version" value="${measurementInstance?.version}" />
+                <g:hiddenField name="batch.id" value="${measurementInstance?.batch?.id}"  />
+
                 <div class="buttons">
                     <span class="button"><g:actionSubmit class="save" action="customupdate" value="${message(code: 'default.button.update.label', default: 'Update')}" /></span>
                     <span class="button"><g:actionSubmit class="delete" action="customdelete" value="${message(code: 'default.button.delete.label', default: 'Delete')}" onclick="return confirm('${message(code: 'default.button.delete.confirm.message', default: 'Are you sure?')}');" /></span>
@@ -104,15 +106,6 @@
                                 </td>
                                 <td valign="top" class="value ${hasErrors(bean: measurementInstance, field: 'dateAdded', 'errors')}">
                                     <g:datePicker name="dateAdded" precision="minute" precision="day" value="${measurementInstance?.dateAdded}" default="none" noSelection="['': '']" />
-                                </td>
-                            </tr>
-                        
-                            <tr class="prop">
-                                <td valign="top" class="name">
-                                  <label for="batch"><g:message code="measurement.batch.label" default="Batch" /></label>
-                                </td>
-                                <td valign="top" class="value ${hasErrors(bean: measurementInstance, field: 'batch', 'errors')}">
-                                    <g:select name="batch.id" from="${beertool.Batch.list()}" optionKey="id" value="${measurementInstance?.batch?.id}"  />
                                 </td>
                             </tr>
                         

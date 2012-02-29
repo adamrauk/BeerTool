@@ -4,6 +4,9 @@ class BootStrap {
 	def springSecurityService
 	
     def init = { servletContext ->
+
+
+		
 		def hops=[
 			'Admiral (RH 40)': [alphaAcid: 13],
 			'Ahtanum': [alphaAcid: 6],
@@ -85,9 +88,6 @@ class BootStrap {
 			grainsInstance.save(flush:true)
 		}
 
-		
-		
-		
 		def sugar1 = new beertool.Sugar(name: "DME", potentialGravity: 1.045)
 		sugar1.save()
 		

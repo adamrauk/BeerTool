@@ -1,6 +1,8 @@
 package beertool;
 import grails.plugins.springsecurity.Secured;
 import org.springframework.util.StringUtils;
+import grails.converters.JSON
+
 
 class RecipeController {
 	def springSecurityService
@@ -17,6 +19,14 @@ class RecipeController {
 		 else {userInstance=User.findWhere(username: 'anonymous')}
 		return userInstance}
 
+	def getRecipe = {
+		def recipeInstance = Recipe.get(params.id)
+		def recipevals = recipeInstance as JSON
+		def hopvals = recipeInstance.recipeHops as JSON
+		def grainvals = recipeInstance.recipeGrains as JSON
+		render([recipevals, hopvals, grainvals])
+	}
+	
     def index = {
         redirect(action: "list", params: params)
     }
