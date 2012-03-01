@@ -80,14 +80,17 @@ grails{
 }
 
 // log4j configuration
-log4j = {
+lozg4j = {
     // Example of changing the log pattern for the default console
     // appender:
     //
     //appenders {
     //    console name:'stdout', layout:pattern(conversionPattern: '%c{2} %m%n')
     //}
-
+	appenders {
+		file name:'stacktrace', file:"~/appservers/apache-tomcat-7.0.25/logs/stacktrace.log".toString()
+	  }
+  
     error  'org.codehaus.groovy.grails.web.servlet',  //  controllers
            'org.codehaus.groovy.grails.web.pages', //  GSP
            'org.codehaus.groovy.grails.web.sitemesh', //  layouts
@@ -102,7 +105,7 @@ log4j = {
 
     warn   'org.mortbay.log'
 }
-
+  
 // Added by the Spring Security Core plugin:
 grails.plugins.springsecurity.userLookup.userDomainClassName = 'beertool.User'
 grails.plugins.springsecurity.userLookup.authorityJoinClassName = 'beertool.SecUserSecRole'
